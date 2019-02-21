@@ -16,6 +16,8 @@ const double RADIUS = 250;
 bool isCompleted = false;
 Color blue = Colors.blue;
 Color blueDark = Colors.blue[700];
+TimeOfDay now = TimeOfDay.now();
+
 
 
 
@@ -35,23 +37,76 @@ class _SamplePageState extends State<SamplePage> {
 
   String currentLeagueName = "SWENG 37";
   int steps = 0;
+  int totalSteps = 0;
   int goal = 3000;
-  List<Widget> _screens = [null, null, null];
+  List<Widget> _screens = new List(3);
+  List<Widget> leaderboard =  new List(7);
 
 
   @override
   Widget build(BuildContext context) {
-
+    leaderboard = [const ListTile(
+        leading: Text("1."),
+        title: Text('Owen Johnston'),
+        trailing: Text("7500"),
+      ),
+      const ListTile(
+        leading: Text("2."),
+        title: Text(
+          'YOU',
+          style: TextStyle(color: Colors.blue),
+        ),
+        trailing: Text("5132"),
+      ),
+      const ListTile(
+        leading: Text("3."),
+        title: Text('Caolan Wall'),
+        trailing: Text("4789"),
+      ),
+      const ListTile(
+        leading: Text("4."),
+        title: Text('Ebin Benny'),
+        trailing: Text("3467"),
+      ),
+      const ListTile(
+        leading: Text("5."),
+        title: Text('David Scollard'),
+        trailing: Text("2104"),
+      ),
+      const ListTile(
+        leading: Text("6."),
+        title: Text('Baptiste Frere'),
+        trailing: Text("1869"),
+      ),
+      const ListTile(
+        leading: Text("7."),
+        title: Text('John Zhang'),
+        trailing: Text("1045"),
+      )
+    ];
     setUpPedometer();
-    Widget home = sampleHome(currentLeagueName, steps, goal);
+    Widget home = sampleHome(currentLeagueName, steps, goal, leaderboard, totalSteps);
     Widget history = historyPage();
     Widget leagues = leaguesPage();
     _screens[1] = home;
     _screens[0] = history;
     _screens[2] = leagues;
+
+
     return Scaffold(
       appBar: new AppBar(
         title: new Text("Trinity Active"),
+        actions: <Widget>[
+          new SizedBox(
+            child:
+            RaisedButton(
+              color: Colors.blue,
+              onPressed: newDay,
+              child:
+              Text("RESET STEPS"),
+            ),
+          )
+        ],
       ),
       body: _screens[_currentIndex],
       bottomNavigationBar:
@@ -77,11 +132,19 @@ class _SamplePageState extends State<SamplePage> {
     );
   }
 
-  void addStep() {
+  void setStep() {
     setState(() {
       steps++;
     });
   }
+
+  void newDay() {
+    setState(() {
+      totalSteps = totalSteps + steps;
+      //totalSteps = 0;
+    });
+  }
+
 
   void setUpPedometer() {
     Pedometer pedometer = new Pedometer();
@@ -91,7 +154,7 @@ class _SamplePageState extends State<SamplePage> {
 
   void _onData(int stepCountValue) async {
     setState(() {
-      steps = stepCountValue;
+      steps = stepCountValue - totalSteps;
       if(steps >= goal) {
         _toggleCompletion();
       }
@@ -184,7 +247,7 @@ CircularPercentIndicator mainIndicator(int steps, int goal) {
 
 
 //Made this it's own entire widget so we can control what widgets are displayed(for changing screens)
-Widget sampleHome(String currentLeagueName, int steps, int goal) {
+Widget sampleHome(String currentLeagueName, int steps, int goal, List<Widget> leaderboard, int totalSteps) {
   return (Center(
     child: ListView(
         children: <Widget>[
@@ -243,44 +306,13 @@ Widget sampleHome(String currentLeagueName, int steps, int goal) {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 //Temporarily hardcoded just for visual example and testing ListTile
-                const ListTile(
-                  leading: Text("1."),
-                  title: Text('Owen Johnston'),
-                  trailing: Text("7500"),
-                ),
-                const ListTile(
-                  leading: Text("2."),
-                  title: Text(
-                    'YOU',
-                    style: TextStyle(color: Colors.blue),
-                  ),
-                  trailing: Text("5132"),
-                ),
-                const ListTile(
-                  leading: Text("3."),
-                  title: Text('Caolan Wall'),
-                  trailing: Text("4789"),
-                ),
-                const ListTile(
-                  leading: Text("4."),
-                  title: Text('Ebin Benny'),
-                  trailing: Text("3467"),
-                ),
-                const ListTile(
-                  leading: Text("5."),
-                  title: Text('David Scollard'),
-                  trailing: Text("2104"),
-                ),
-                const ListTile(
-                  leading: Text("6."),
-                  title: Text('Baptiste Frere'),
-                  trailing: Text("1869"),
-                ),
-                const ListTile(
-                  leading: Text("7."),
-                  title: Text('John Zhang'),
-                  trailing: Text("1045"),
-                ),
+                leaderboard[0],
+                leaderboard[1],
+                leaderboard[2],
+                leaderboard[3],
+                leaderboard[4],
+                leaderboard[5],
+                leaderboard[6],
               ],
             ),
           ),
