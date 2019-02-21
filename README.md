@@ -1,4 +1,4 @@
-# circular_indicator_test
+# Trinity_Active_Frontend
 
 A new Flutter application.
 
