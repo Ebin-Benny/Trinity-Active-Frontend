@@ -397,7 +397,7 @@ CircularPercentIndicator homeIndicator(int steps, int goal) {
               'images/goal_image.png',
                height: 30,
                width: 25,
-                
+
               ),
               new Padding(
                 padding: EdgeInsets.symmetric(horizontal: 3),
@@ -480,10 +480,47 @@ Widget leaguesFocus(String currentLeagueName, int steps, int goal, List<Widget> 
               ]
 
           ),
+          new Padding(padding: EdgeInsets.symmetric(vertical: 5)),
           Card(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
+                Container(
+                  constraints: BoxConstraints.expand(height: 40),
+                  decoration: new BoxDecoration(
+                    color: Colors.lightBlue[200],
+                    border: new Border.all(
+                      color: Colors.lightBlue[200],
+                      width: 5,
+                      style: BorderStyle.solid,
+                    ),
+                    borderRadius: new BorderRadius.vertical(
+                      top: new Radius.circular(5),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      Icon(
+                        Icons.stars,
+                        color: Colors.white,
+                      ),
+                      new Padding(padding: EdgeInsets.symmetric(horizontal: 50)),
+                      new Text(
+                        "Leaderboard",
+                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 18),
+                      ),
+                      new Padding(padding: EdgeInsets.symmetric(horizontal: 50)),
+                      Image.asset(
+                        "images/steps_image.png",
+                        height: 25,
+                        width: 20,
+                        color: Colors.white,
+                      ),
+                    ],
+                  ),
+
+                ),
                 //Temporarily hardcoded just for visual example and testing ListTile
                 leaderboard[0],
                 leaderboard[1],
