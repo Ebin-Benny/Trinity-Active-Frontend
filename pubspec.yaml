@@ -36,6 +36,7 @@ flutter:
     - images/steps_image.png
     - images/goal_image.png
     - images/logo_image.png
+    - images/sparkles.png
 
 
   # The following line ensures that the Material Icons font is
