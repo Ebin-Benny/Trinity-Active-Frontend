@@ -18,10 +18,9 @@ Color blue = Colors.blue;
 Color blueDark = Colors.blue[700];
 
 
+
 class _SamplePageState extends State<SamplePage> {
   int _currentIndex = 1;
-  final List<Widget> _children = [];
-  String currentLeagueName = "SWENG 37";
 
   StreamSubscription<int> _subscription;
 
@@ -33,36 +32,48 @@ class _SamplePageState extends State<SamplePage> {
       ),
     );
   }
+
+  String currentLeagueName = "SWENG 37";
   int steps = 0;
   int goal = 3000;
+  List<Widget> _screens = [null, null, null];
+
+
   @override
   Widget build(BuildContext context) {
+
     setUpPedometer();
+    Widget home = sampleHome(currentLeagueName, steps, goal);
+    Widget history = historyPage();
+    Widget leagues = leaguesPage();
+    _screens[1] = home;
+    _screens[0] = history;
+    _screens[2] = leagues;
     return Scaffold(
       appBar: new AppBar(
         title: new Text("Trinity Active"),
       ),
+      body: _screens[_currentIndex],
       bottomNavigationBar:
-        BottomNavigationBar(
-          currentIndex: _currentIndex,
-          onTap: (int index) {
-            setState(() {
-              _currentIndex = index;
-            });
-          },
-          items: [
-            BottomNavigationBarItem(
-                icon: Icon(Icons.access_time),
-                title: Text("History")),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.home),
-                title: Text("Home")),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.group),
-                title: Text("Leagues"))
-          ],
-        ),
-      body: sampleHome(currentLeagueName, steps, goal),
+      BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (int index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        items: [
+          BottomNavigationBarItem(
+              icon: Icon(Icons.access_time),
+              title: Text("History")),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              title: Text("Home")),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.group),
+              title: Text("Leagues"))
+        ],
+      ),
     );
   }
 
@@ -275,6 +286,20 @@ Widget sampleHome(String currentLeagueName, int steps, int goal) {
           ),
         ]),
   ));
+}
+
+Widget historyPage() {
+  Container(
+    alignment: Alignment.center,
+    color: Colors.grey,
+  );
+}
+
+Widget leaguesPage() {
+  Container(
+    alignment: Alignment.center,
+    color: Colors.lightBlue,
+  );
 }
 
 
