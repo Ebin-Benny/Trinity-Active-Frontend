@@ -151,7 +151,6 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   List<Widget> leaderboard =  new List(7);
   DateTime today = new DateTime.now();
   List<History> history = new List();
-  History history1 = new History(DateTime.now(), 6000);
   //DateTime today = new DateTime(2019, 2, 21);
 
 
@@ -198,7 +197,7 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
       )
     ];
     setUpPedometer();
-    Widget home = homePage(steps, goal, today, history, history1);
+    Widget home = homePage(steps, goal, today, history);
     Widget historyScreen = historyPage();
     Widget leagues = leaguesPage(currentLeagueName, steps, goal, leaderboard, totalSteps);
     _screens[1] = home;
@@ -219,8 +218,13 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
               Text("NEW DAY"),
             ),
           ),
+          IconButton(
+              icon: Icon(Icons.settings),
+              onPressed: null
+          ),
         ],
       ),
+
       body:  _screens[_currentIndex],
 
 
@@ -256,8 +260,7 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
 
   void newDay() {
     setState(() {
-      history.add(new History(today, steps));
-      history1.steps = steps;
+      history.add(new History(today, steps, goal));
       print(history.length);
       for(int i = 0; i < history.length; i++) {
         print(history[i].steps.toString() + "  index:" + i.toString());
@@ -558,7 +561,7 @@ Widget historyPage() {
   );
 }
 
-Widget homePage(int steps, int goal, DateTime today, List<History> history, History history1) {
+Widget homePage(int steps, int goal, DateTime today, List<History> history) {
   return Center(
     child: ListView(
       children: <Widget>[
@@ -625,7 +628,7 @@ Widget homePage(int steps, int goal, DateTime today, List<History> history, Hist
                         radius: 100,
                         lineWidth: 10,
                         backgroundColor: Colors.grey.withOpacity(0.2),
-                        progressColor: Colors.blue,
+                        progressColor: history.isNotEmpty && history.length >= 1 ? ( history[history.length-1].isComplete ? Colors.lightGreenAccent[700]  : Colors.blue ) : Colors.blue,
                         percent: history.isNotEmpty && history.length >= 1 ? (history[history.length-1].steps < goal ? history[history.length-1].steps / goal : 1.0) : 0.0,
                         circularStrokeCap: CircularStrokeCap.round,
                         animation: true,
@@ -638,7 +641,7 @@ Widget homePage(int steps, int goal, DateTime today, List<History> history, Hist
                             ),
                             new Text(
                               history.isNotEmpty && history.length >= 1 ? history[history.length-1].steps.toString() : "0",
-                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue, fontSize: 18),
+                              style: TextStyle(fontWeight: FontWeight.bold,color: history.isNotEmpty && history.length >= 1 ? ( history[history.length-1].isComplete ? Colors.lightGreenAccent[700]  : Colors.blue ) : Colors.blue, fontSize: 18),
                             ),
                           ],
                         ),
@@ -648,7 +651,7 @@ Widget homePage(int steps, int goal, DateTime today, List<History> history, Hist
                         radius: 100,
                         lineWidth: 10,
                         backgroundColor: Colors.grey.withOpacity(0.2),
-                        progressColor: Colors.blue,
+                        progressColor: history.isNotEmpty && history.length >= 2 ? ( history[history.length-2].isComplete ? Colors.lightGreenAccent[700]  : Colors.blue ) : Colors.blue,
                         percent:  history.isNotEmpty && history.length >= 2 ? (history[history.length-2].steps < goal ? history[history.length-2].steps / goal : 1.0) : 0.0,
                         circularStrokeCap: CircularStrokeCap.round,
                         animation: true,
@@ -661,7 +664,7 @@ Widget homePage(int steps, int goal, DateTime today, List<History> history, Hist
                             ),
                             new Text(
                               history.isNotEmpty && history.length >= 2 ? history[history.length-2].steps.toString() : "0",
-                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue, fontSize: 18),
+                              style: TextStyle(fontWeight: FontWeight.bold, color: history.isNotEmpty && history.length >= 2 ? ( history[history.length-2].isComplete ? Colors.lightGreenAccent[700]  : Colors.blue ) : Colors.blue, fontSize: 18),
                             ),
                           ],
                         ),
@@ -671,7 +674,7 @@ Widget homePage(int steps, int goal, DateTime today, List<History> history, Hist
                         radius: 100,
                         lineWidth: 10,
                         backgroundColor: Colors.grey.withOpacity(0.2),
-                        progressColor: Colors.blue,
+                        progressColor: history.isNotEmpty && history.length >= 3 ? ( history[history.length-3].isComplete ? Colors.lightGreenAccent[700]  : Colors.blue ) : Colors.blue,
                         percent: history.isNotEmpty && history.length >= 3 ? (history[history.length-3].steps < goal ? history[history.length-1].steps / goal : 1.0) : 0.0,
                         circularStrokeCap: CircularStrokeCap.round,
                         animation: true,
@@ -684,7 +687,7 @@ Widget homePage(int steps, int goal, DateTime today, List<History> history, Hist
                             ),
                             new Text(
                               history.isNotEmpty && history.length >= 3 ? history[history.length-3].steps.toString() : "0",
-                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue, fontSize: 18),
+                              style: TextStyle(fontWeight: FontWeight.bold, color: history.isNotEmpty && history.length >= 3 ? ( history[history.length-3].isComplete ? Colors.lightGreenAccent[700]  : Colors.blue ) : Colors.blue, fontSize: 18),
                             ),
                           ],
                         ),
@@ -699,7 +702,7 @@ Widget homePage(int steps, int goal, DateTime today, List<History> history, Hist
                         radius: 100,
                         lineWidth: 10,
                         backgroundColor: Colors.grey.withOpacity(0.2),
-                        progressColor: Colors.blue,
+                        progressColor: history.isNotEmpty && history.length >= 4 ? ( history[history.length-4].isComplete ? Colors.lightGreenAccent[700]  : Colors.blue ) : Colors.blue,
                         percent: history.isNotEmpty && history.length >= 4 ? (history[history.length-4].steps < goal ? history[history.length-1].steps / goal : 1.0) : 0.0,
                         circularStrokeCap: CircularStrokeCap.round,
                         animation: true,
@@ -712,7 +715,7 @@ Widget homePage(int steps, int goal, DateTime today, List<History> history, Hist
                             ),
                             new Text(
                               history.isNotEmpty && history.length >= 4 ? history[history.length-4].steps.toString() : "0",
-                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue, fontSize: 18),
+                              style: TextStyle(fontWeight: FontWeight.bold, color: history.isNotEmpty && history.length >= 4 ? ( history[history.length-4].isComplete ? Colors.lightGreenAccent[700]  : Colors.blue ) : Colors.blue, fontSize: 18),
                             ),
                           ],
                         ),
@@ -723,7 +726,7 @@ Widget homePage(int steps, int goal, DateTime today, List<History> history, Hist
                         radius: 100,
                         lineWidth: 10,
                         backgroundColor: Colors.grey.withOpacity(0.2),
-                        progressColor: Colors.blue,
+                        progressColor: history.isNotEmpty && history.length >= 5 ? ( history[history.length-5].isComplete ? Colors.lightGreenAccent[700]  : Colors.blue ) : Colors.blue,
                         percent: history.isNotEmpty && history.length >= 5 ? (history[history.length-5].steps < goal ? history[history.length-1].steps / goal : 1.0) : 0.0,
                         circularStrokeCap: CircularStrokeCap.round,
                         animation: true,
@@ -736,7 +739,7 @@ Widget homePage(int steps, int goal, DateTime today, List<History> history, Hist
                             ),
                             new Text(
                               history.isNotEmpty && history.length >= 5 ? history[history.length-5].steps.toString() : "0",
-                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue, fontSize: 18),
+                              style: TextStyle(fontWeight: FontWeight.bold, color: history.isNotEmpty && history.length >= 5 ? ( history[history.length-5].isComplete ? Colors.lightGreenAccent[700]  : Colors.blue ) : Colors.blue, fontSize: 18),
                             ),
                           ],
                         ),
@@ -764,10 +767,14 @@ Widget leaguesPage(String currentLeagueName, int steps, int goal, List<Widget> l
 class History {
   DateTime day;
   int steps;
-  bool isComplete;
-  History(DateTime day, int steps) {
+  bool isComplete = false;
+  int goal;
+  History(DateTime day, int steps, int goal) {
     this.day = day;
     this.steps = steps;
+    if(steps >= goal) {
+      isComplete = true;
+    }
   }
 }
 
