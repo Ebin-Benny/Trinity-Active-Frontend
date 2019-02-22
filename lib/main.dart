@@ -369,11 +369,18 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
 
                   ),
                   new Padding(padding: EdgeInsets.symmetric(vertical: 10)),
-                  new TextField(
-                    controller: textController,
-                    keyboardType: TextInputType.number,
-                    textAlign: TextAlign.center,
-                    
+                  Container(
+                    width: 200,
+                    child: new TextField(
+                      controller: textController,
+                      keyboardType: TextInputType.number,
+                      textAlign: TextAlign.center,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.grey.withOpacity(0.1),
+                        hintText: goal.toString(),
+                      ),
+                    ),
                   ),
                   new Padding(padding: EdgeInsets.symmetric(vertical: 35)),
                   Row(
