@@ -17,7 +17,6 @@ const double RADIUS = 250;
 bool isCompleted = false;
 Color blue = Colors.blue;
 Color blueDark = Colors.blue[700];
-TimeOfDay now = TimeOfDay.now();
 int _score = 0;
 int _steps = 0;
 int _multiplier = 1;
@@ -147,9 +146,14 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   String currentLeagueName = "SWENG 37";
   int steps = 0;
   int totalSteps = 0;
-  int goal = 3000;
+  int goal = 10000;
   List<Widget> _screens = new List(3);
   List<Widget> leaderboard =  new List(7);
+  DateTime today = new DateTime.now();
+  List<History> history = new List();
+  History history1 = new History(DateTime.now(), 6000);
+  //DateTime today = new DateTime(2019, 2, 21);
+
 
 
   @override
@@ -194,11 +198,11 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
       )
     ];
     setUpPedometer();
-    Widget home = homePage(steps, goal);
-    Widget history = historyPage();
+    Widget home = homePage(steps, goal, today, history, history1);
+    Widget historyScreen = historyPage();
     Widget leagues = leaguesPage(currentLeagueName, steps, goal, leaderboard, totalSteps);
     _screens[1] = home;
-    _screens[0] = history;
+    _screens[0] = historyScreen;
     _screens[2] = leagues;
     final double width = MediaQuery.of(context).size.width;
 
@@ -212,7 +216,7 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
               color: Colors.blue,
               onPressed: newDay,
               child:
-              Text("RESET STEPS"),
+              Text("NEW DAY"),
             ),
           ),
         ],
@@ -252,7 +256,14 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
 
   void newDay() {
     setState(() {
+      history.add(new History(today, steps));
+      history1.steps = steps;
+      print(history.length);
+      for(int i = 0; i < history.length; i++) {
+        print(history[i].steps.toString() + "  index:" + i.toString());
+      }
       totalSteps = totalSteps + steps;
+      isCompleted = false;
       //totalSteps = 0;
     });
   }
@@ -266,6 +277,10 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
 
   void _onData(int stepCountValue) async {
     setState(() {
+      DateTime current = new DateTime.now();
+      if(current.day != today.day) {
+        newDay();
+      }
       steps = stepCountValue - totalSteps;
       if(steps >= goal) {
         _toggleCompletion();
@@ -543,7 +558,7 @@ Widget historyPage() {
   );
 }
 
-Widget homePage(int steps, int goal) {
+Widget homePage(int steps, int goal, DateTime today, List<History> history, History history1) {
   return Center(
     child: ListView(
       children: <Widget>[
@@ -556,7 +571,7 @@ Widget homePage(int steps, int goal) {
             Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.calendar_today, color: Colors.grey.withOpacity(0.8),),
+                  Icon(Icons.calendar_today, color: Colors.grey.withOpacity(0.8), size: 20,),
                   new Padding(
                     padding: EdgeInsets.symmetric(horizontal: 2),
                   ),
@@ -568,6 +583,171 @@ Widget homePage(int steps, int goal) {
                 ]
             ),
             homeIndicator(steps, goal),
+            new Text(
+              today.day.toString() + "-" + today.month.toString() + "-" + today.year.toString(),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.grey.withOpacity(1)),
+            ),
+            new Card(
+              child: Column(
+                children: <Widget>[
+                  new Padding(padding: EdgeInsets.symmetric(vertical: 5)),
+                  Container(
+                    constraints: BoxConstraints.expand(height: 40),
+                    decoration: new BoxDecoration(
+                      color: Colors.lightBlue[200],
+                      border: new Border.all(
+                        color: Colors.lightBlue[200],
+                        width: 5,
+                        style: BorderStyle.solid,
+                      ),
+                      borderRadius: new BorderRadius.vertical(
+                        top: new Radius.circular(5),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        new Padding(padding: EdgeInsets.symmetric(horizontal: 50)),
+                        new Text(
+                          "Last 5 Days",
+                          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 18),
+                        ),
+                        new Padding(padding: EdgeInsets.symmetric(horizontal: 50)),
+                      ],
+                    ),
+
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      new CircularPercentIndicator(
+                        startAngle: 180,
+                        radius: 100,
+                        lineWidth: 10,
+                        backgroundColor: Colors.grey.withOpacity(0.2),
+                        progressColor: Colors.blue,
+                        percent: history.isNotEmpty && history.length >= 1 ? (history[history.length-1].steps < goal ? history[history.length-1].steps / goal : 1.0) : 0.0,
+                        circularStrokeCap: CircularStrokeCap.round,
+                        animation: true,
+                        center: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            new Text(
+                              "STEPS",
+                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey.withOpacity(0.5), fontSize: 10),
+                            ),
+                            new Text(
+                              history.isNotEmpty && history.length >= 1 ? history[history.length-1].steps.toString() : "0",
+                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue, fontSize: 18),
+                            ),
+                          ],
+                        ),
+                      ),
+                      new CircularPercentIndicator(
+                        startAngle: 180,
+                        radius: 100,
+                        lineWidth: 10,
+                        backgroundColor: Colors.grey.withOpacity(0.2),
+                        progressColor: Colors.blue,
+                        percent:  history.isNotEmpty && history.length >= 2 ? (history[history.length-2].steps < goal ? history[history.length-2].steps / goal : 1.0) : 0.0,
+                        circularStrokeCap: CircularStrokeCap.round,
+                        animation: true,
+                        center: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            new Text(
+                              "STEPS",
+                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey.withOpacity(0.5), fontSize: 10),
+                            ),
+                            new Text(
+                              history.isNotEmpty && history.length >= 2 ? history[history.length-2].steps.toString() : "0",
+                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue, fontSize: 18),
+                            ),
+                          ],
+                        ),
+                      ),
+                      new CircularPercentIndicator(
+                        startAngle: 180,
+                        radius: 100,
+                        lineWidth: 10,
+                        backgroundColor: Colors.grey.withOpacity(0.2),
+                        progressColor: Colors.blue,
+                        percent: history.isNotEmpty && history.length >= 3 ? (history[history.length-3].steps < goal ? history[history.length-1].steps / goal : 1.0) : 0.0,
+                        circularStrokeCap: CircularStrokeCap.round,
+                        animation: true,
+                        center: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            new Text(
+                              "STEPS",
+                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey.withOpacity(0.5), fontSize: 10),
+                            ),
+                            new Text(
+                              history.isNotEmpty && history.length >= 3 ? history[history.length-3].steps.toString() : "0",
+                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue, fontSize: 18),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      new CircularPercentIndicator(
+                        startAngle: 180,
+                        radius: 100,
+                        lineWidth: 10,
+                        backgroundColor: Colors.grey.withOpacity(0.2),
+                        progressColor: Colors.blue,
+                        percent: history.isNotEmpty && history.length >= 4 ? (history[history.length-4].steps < goal ? history[history.length-1].steps / goal : 1.0) : 0.0,
+                        circularStrokeCap: CircularStrokeCap.round,
+                        animation: true,
+                        center: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            new Text(
+                              "STEPS",
+                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey.withOpacity(0.5), fontSize: 10),
+                            ),
+                            new Text(
+                              history.isNotEmpty && history.length >= 4 ? history[history.length-4].steps.toString() : "0",
+                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue, fontSize: 18),
+                            ),
+                          ],
+                        ),
+                      ),
+                      new Padding(padding: EdgeInsets.symmetric(horizontal: 15)),
+                      new CircularPercentIndicator(
+                        startAngle: 180,
+                        radius: 100,
+                        lineWidth: 10,
+                        backgroundColor: Colors.grey.withOpacity(0.2),
+                        progressColor: Colors.blue,
+                        percent: history.isNotEmpty && history.length >= 5 ? (history[history.length-5].steps < goal ? history[history.length-1].steps / goal : 1.0) : 0.0,
+                        circularStrokeCap: CircularStrokeCap.round,
+                        animation: true,
+                        center: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            new Text(
+                              "STEPS",
+                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey.withOpacity(0.5), fontSize: 10),
+                            ),
+                            new Text(
+                              history.isNotEmpty && history.length >= 5 ? history[history.length-5].steps.toString() : "0",
+                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue, fontSize: 18),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                    ],
+                  ),
+                  new Padding(padding: EdgeInsets.symmetric(vertical: 5)),
+                ],
+              ),
+            ),
           ],
         )
       ],
@@ -580,6 +760,17 @@ Widget leaguesPage(String currentLeagueName, int steps, int goal, List<Widget> l
   return leaguesFocus(currentLeagueName, steps, goal, leaderboard, totalSteps);
   
 }
+
+class History {
+  DateTime day;
+  int steps;
+  bool isComplete;
+  History(DateTime day, int steps) {
+    this.day = day;
+    this.steps = steps;
+  }
+}
+
 
 
 
