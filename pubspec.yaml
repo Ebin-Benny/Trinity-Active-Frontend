@@ -37,6 +37,8 @@ flutter:
     - images/goal_image.png
     - images/logo_image.png
     - images/sparkles.png
+    - images/trophy.png
+    - images/bullseye-arrow.png
 
 
   # The following line ensures that the Material Icons font is

@@ -108,6 +108,8 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   AnimationController _controller;
   Animation _animation;
 
+  final textController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -124,6 +126,7 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   @override
   void dispose() {
     _controller.dispose();
+    textController.dispose();
     super.dispose();
   }
   //-----------------------------------------------
@@ -153,7 +156,7 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   DateTime today = new DateTime.now();
   List<History> history = new List();
   //DateTime today = new DateTime(2019, 2, 21);
-
+  bool showGoalOptions = false;
 
 
   @override
@@ -236,12 +239,42 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                 ],
               ),
             ),
+            new ListTile(
+              leading: Image.asset(
+                "images/trophy.png",
+                color: Colors.grey[600],
+              ),
+              title: new Text(
+                "Trophy Cabinet",
+                style: TextStyle(fontSize: 18, color: Colors.grey[600],),
+              ),
+              onTap: () {
+                Navigator.push(context, new MaterialPageRoute(
+                    builder: (BuildContext context) => new trophyPage())
+                );
+              },
+            ),
+            new ListTile(
+              leading: Image.asset(
+                "images/bullseye-arrow.png",
+                color: Colors.grey[600],
+                height: 25,
+                width: 25,
+              ),
+              title: new Text(
+                "Goals",
+                style: TextStyle(fontSize: 18, color: Colors.grey[600],),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                toggleGoalOptions();
+              },
+            ),
 
           ],
         ),
       ],
     );
-
 
 
     Drawer drawer = new Drawer(child: drawerListView,);
@@ -264,6 +297,8 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
         ],
       ),
 
+      floatingActionButton: showGoalOptions ? goalOptions() : null,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       body:  _screens[_currentIndex],
 
 
@@ -291,9 +326,87 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
     );
   }
 
+  Widget goalOptions() {
+    return new  Center(
+        child: Stack(
+          alignment: Alignment.center,
+          children: <Widget>[
+            Container(
+              constraints: BoxConstraints.expand(),
+              color: Colors.black.withOpacity(0.2),
+            ),
+            Container(
+              constraints: BoxConstraints.expand(height: 400, width: 300),
+              decoration: new BoxDecoration(
+                color: Colors.white,
+                border: new Border.all(
+                  color: Colors.white,
+                  width: 5,
+                  style: BorderStyle.solid,
+                ),
+                borderRadius: new BorderRadius.all(
+                  new Radius.circular(5),
+                ),
+              ),
+              child: Column(
+                children: <Widget>[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: <Widget>[
+                      IconButton(
+                        icon: Icon(Icons.close),
+                        onPressed: toggleGoalOptions,
+                      )
+                    ],
+                  ),
+                  Image.asset(
+                    "images/goal_image.png",
+                  ),
+                  new Padding(padding: EdgeInsets.symmetric(vertical: 10)),
+                  new Text(
+                    "SET GOAL",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: Colors.grey.withOpacity(1)),
+
+                  ),
+                  new Padding(padding: EdgeInsets.symmetric(vertical: 10)),
+                  new TextField(
+                    controller: textController,
+                    keyboardType: TextInputType.number,
+                    textAlign: TextAlign.center,
+                    
+                  ),
+                  new Padding(padding: EdgeInsets.symmetric(vertical: 35)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: <Widget>[
+                      FloatingActionButton(
+                        child: Icon(Icons.check),
+                        onPressed: () {
+                          toggleGoalOptions();
+                          setGoal(num.parse(textController.text));
+                        },
+                      ),
+                    ],
+                  )
+
+                ],
+              ),
+            ),
+          ],
+        )
+    );
+  }
+
   void setStep() {
     setState(() {
       steps++;
+    });
+  }
+
+  void setGoal(int newGoal) {
+    setState(() {
+      goal = newGoal;
+      checkCompletion(steps, goal);
     });
   }
 
@@ -325,7 +438,7 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
       }
       steps = stepCountValue - totalSteps;
       if(steps >= goal) {
-        _toggleCompletion();
+        setCompletion();
       }
     });
   }
@@ -336,9 +449,31 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   void _onCancel() => _subscription.cancel();
 
   //TODO : temp implementation
-  void _toggleCompletion() {
+  void checkCompletion(int steps, int goal) {
+    setState(() {
+      if(steps < goal) {
+        isCompleted = false;
+      }
+      else if(steps >= goal) {
+        isCompleted = true;
+      }
+    });
+  }
+
+  void setCompletion() {
     setState(() {
       isCompleted = true;
+    });
+  }
+
+  void toggleGoalOptions() {
+    setState(() {
+      if(showGoalOptions) {
+        showGoalOptions = false;
+      }
+      else {
+        showGoalOptions = true;
+      }
     });
   }
 
@@ -711,7 +846,7 @@ Widget homePage(int steps, int goal, DateTime today, List<History> history) {
                         lineWidth: 10,
                         backgroundColor: Colors.grey.withOpacity(0.2),
                         progressColor: history.isNotEmpty && history.length >= 1 ? ( history[history.length-1].isComplete ? Colors.lightGreenAccent[700]  : Colors.blue ) : Colors.blue,
-                        percent: history.isNotEmpty && history.length >= 1 ? (history[history.length-1].steps < goal ? history[history.length-1].steps / goal : 1.0) : 0.0,
+                        percent: history.isNotEmpty && history.length >= 1 ? (history[history.length-1].steps < history[history.length-1].goal ? history[history.length-1].steps / history[history.length-1].goal : 1.0) : 0.0,
                         circularStrokeCap: CircularStrokeCap.round,
                         animation: true,
                         center: Column(
@@ -734,7 +869,7 @@ Widget homePage(int steps, int goal, DateTime today, List<History> history) {
                         lineWidth: 10,
                         backgroundColor: Colors.grey.withOpacity(0.2),
                         progressColor: history.isNotEmpty && history.length >= 2 ? ( history[history.length-2].isComplete ? Colors.lightGreenAccent[700]  : Colors.blue ) : Colors.blue,
-                        percent:  history.isNotEmpty && history.length >= 2 ? (history[history.length-2].steps < goal ? history[history.length-2].steps / goal : 1.0) : 0.0,
+                        percent:  history.isNotEmpty && history.length >= 2 ? (history[history.length-2].steps < history[history.length-2].goal ? history[history.length-2].steps / history[history.length-2].goal : 1.0) : 0.0,
                         circularStrokeCap: CircularStrokeCap.round,
                         animation: true,
                         center: Column(
@@ -757,7 +892,7 @@ Widget homePage(int steps, int goal, DateTime today, List<History> history) {
                         lineWidth: 10,
                         backgroundColor: Colors.grey.withOpacity(0.2),
                         progressColor: history.isNotEmpty && history.length >= 3 ? ( history[history.length-3].isComplete ? Colors.lightGreenAccent[700]  : Colors.blue ) : Colors.blue,
-                        percent: history.isNotEmpty && history.length >= 3 ? (history[history.length-3].steps < goal ? history[history.length-1].steps / goal : 1.0) : 0.0,
+                        percent: history.isNotEmpty && history.length >= 3 ? (history[history.length-3].steps < history[history.length-3].goal ? history[history.length-1].steps / history[history.length-3].goal : 1.0) : 0.0,
                         circularStrokeCap: CircularStrokeCap.round,
                         animation: true,
                         center: Column(
@@ -785,7 +920,7 @@ Widget homePage(int steps, int goal, DateTime today, List<History> history) {
                         lineWidth: 10,
                         backgroundColor: Colors.grey.withOpacity(0.2),
                         progressColor: history.isNotEmpty && history.length >= 4 ? ( history[history.length-4].isComplete ? Colors.lightGreenAccent[700]  : Colors.blue ) : Colors.blue,
-                        percent: history.isNotEmpty && history.length >= 4 ? (history[history.length-4].steps < goal ? history[history.length-1].steps / goal : 1.0) : 0.0,
+                        percent: history.isNotEmpty && history.length >= 4 ? (history[history.length-4].steps < history[history.length-4].goal ? history[history.length-1].steps / history[history.length-4].goal : 1.0) : 0.0,
                         circularStrokeCap: CircularStrokeCap.round,
                         animation: true,
                         center: Column(
@@ -809,7 +944,7 @@ Widget homePage(int steps, int goal, DateTime today, List<History> history) {
                         lineWidth: 10,
                         backgroundColor: Colors.grey.withOpacity(0.2),
                         progressColor: history.isNotEmpty && history.length >= 5 ? ( history[history.length-5].isComplete ? Colors.lightGreenAccent[700]  : Colors.blue ) : Colors.blue,
-                        percent: history.isNotEmpty && history.length >= 5 ? (history[history.length-5].steps < goal ? history[history.length-1].steps / goal : 1.0) : 0.0,
+                        percent: history.isNotEmpty && history.length >= 5 ? (history[history.length-5].steps < history[history.length-5].goal ? history[history.length-1].steps / history[history.length-5].goal : 1.0) : 0.0,
                         circularStrokeCap: CircularStrokeCap.round,
                         animation: true,
                         center: Column(
@@ -854,9 +989,34 @@ class History {
   History(DateTime day, int steps, int goal) {
     this.day = day;
     this.steps = steps;
+    this.goal = goal;
     if(steps >= goal) {
       isComplete = true;
     }
+  }
+}
+
+class trophyPage extends StatefulWidget {
+  @override
+  _trophyPageState createState() => _trophyPageState();
+}
+
+class _trophyPageState extends State<trophyPage> {
+  @override
+  Widget build(BuildContext context) {
+    return null;
+  }
+}
+
+class tempGoalsPage extends StatefulWidget {
+  @override
+  _tempGoalsState createState() => _tempGoalsState();
+}
+
+class _tempGoalsState extends State<tempGoalsPage> {
+  @override
+  Widget build(BuildContext context) {
+    return null;
   }
 }
 
