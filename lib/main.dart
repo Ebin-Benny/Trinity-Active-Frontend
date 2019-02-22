@@ -147,6 +147,7 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   int steps = 0;
   int totalSteps = 0;
   int goal = 10000;
+  int level = 1;
   List<Widget> _screens = new List(3);
   List<Widget> leaderboard =  new List(7);
   DateTime today = new DateTime.now();
@@ -205,9 +206,51 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
     _screens[2] = leagues;
     final double width = MediaQuery.of(context).size.width;
 
+    ListView drawerListView = new ListView(
+      padding: const EdgeInsets.all(0.0),
+      children: <Widget>[
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Container(
+              constraints: BoxConstraints.expand(height: 350),
+              color: Colors.blue,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  new Padding(padding: EdgeInsets.symmetric(vertical: 15)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Icon(
+                        Icons.person,
+                        color: Colors.white,
+                      ),
+                      new Text(
+                        "_username",
+                        style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
+                      ),
+                    ],
+                  ),
+                  levelIndicator(level, totalSteps)
+                ],
+              ),
+            ),
+
+          ],
+        ),
+      ],
+    );
+
+
+
+    Drawer drawer = new Drawer(child: drawerListView,);
+
     return Scaffold(
+      drawer: drawer,
       appBar: new AppBar(
-        title: new Text("Trinity Active"),
+        title:
+        new Text("Trinity Active"),
         actions: <Widget>[
           new SizedBox(
             child:
@@ -217,10 +260,6 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
               child:
               Text("NEW DAY"),
             ),
-          ),
-          IconButton(
-              icon: Icon(Icons.settings),
-              onPressed: null
           ),
         ],
       ),
@@ -303,6 +342,49 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
     });
   }
 
+}
+
+//TODO : Implement levels logic
+CircularPercentIndicator levelIndicator (int level, int totalSteps) {
+  return new CircularPercentIndicator(
+    radius: 200,
+    startAngle: 180,
+    percent: totalSteps/15000,
+    backgroundColor: Colors.blue[900],
+    progressColor: Colors.lightBlueAccent[100],
+    circularStrokeCap: CircularStrokeCap.round,
+    lineWidth: 12,
+    center: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        new Text(
+          "LEVEL",
+          style: TextStyle(fontSize: 16, color: Colors.white.withOpacity(0.5), fontWeight: FontWeight.bold,),
+        ),
+        new Text(
+          level.toString(),
+          style: TextStyle(fontSize: 60, color: Colors.white, fontWeight: FontWeight.bold,),
+        ),
+      ],
+    ),
+    footer: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        new Padding(padding: EdgeInsets.symmetric(vertical: 1)),
+        new Text(
+          "LIFETIME STEPS",
+          style: TextStyle(fontSize: 16, color: Colors.white.withOpacity(0.5), fontWeight: FontWeight.bold,),
+        ),
+        new Text(
+          totalSteps.toString(),
+          style: TextStyle(fontSize: 30, color: Colors.white, fontWeight: FontWeight.bold,),
+        ),
+
+      ],
+    ),
+
+
+  );
 }
 
 //TODO : Figure out how we are going to store the steps and goal values
