@@ -23,6 +23,7 @@ int _multiplier = 1;
 
 
 
+
 class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   int _currentIndex = 1;
 
@@ -151,10 +152,11 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   int totalSteps = 0;
   int goal = 10000;
   int level = 1;
-  List<Widget> _screens = new List(3);
+  List<Widget> _screens = new List(4);
   List<Widget> leaderboard =  new List(7);
   DateTime today = new DateTime.now();
   List<History> history = new List();
+  List<League> leaguesList = new List();
   //DateTime today = new DateTime(2019, 2, 21);
   bool showGoalOptions = false;
 
@@ -201,12 +203,16 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
       )
     ];
     setUpPedometer();
+    League testLeague = new League(steps,goal,2,currentLeagueName);
+    leaguesList.add(testLeague);
     Widget home = homePage(steps, goal, today, history);
     Widget historyScreen = historyPage();
-    Widget leagues = leaguesPage(currentLeagueName, steps, goal, leaderboard, totalSteps);
+    Widget leagues = leaguesPage(leaguesList);
+    Widget specificLeague = leaguesFocus(currentLeagueName, steps, goal, leaderboard, totalSteps);
     _screens[1] = home;
     _screens[0] = historyScreen;
     _screens[2] = leagues;
+    _screens[3] = specificLeague;
     final double width = MediaQuery.of(context).size.width;
 
     ListView drawerListView = new ListView(
@@ -304,7 +310,7 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
 
       bottomNavigationBar:
       BottomNavigationBar(
-        currentIndex: _currentIndex,
+        currentIndex: _currentIndex == 3 ? 2 : _currentIndex,
         onTap: (int index) {
           setState(() {
             _currentIndex = index;
@@ -439,8 +445,10 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
 
   void _onData(int stepCountValue) async {
     setState(() {
+      // TODO: better implementation of the date changing
       DateTime current = new DateTime.now();
       if(current.day != today.day) {
+        today = current;
         newDay();
       }
       steps = stepCountValue - totalSteps;
@@ -484,7 +492,55 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
     });
   }
 
+
+  InkWell leagueSummary(League league) {
+    return new InkWell(
+      splashColor: Colors.blue.withOpacity(0.2),
+      onTap: () {
+        _currentIndex = 3;
+      },
+      child: Column(
+        children: <Widget>[
+
+          CircularPercentIndicator(
+            radius: 170,
+            startAngle: 180,
+            lineWidth: 12,
+            progressColor: Colors.blue,
+            backgroundColor: Colors.grey.withOpacity(0.2),
+            percent: league.steps >= league.goal ? 1 : league.steps/league.goal,
+            circularStrokeCap: CircularStrokeCap.round,
+            center: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                new Text(
+                  league.steps.toString(),
+                  style: TextStyle(fontSize: 30, color: isCompleted ? Colors.lightGreenAccent[700] : Colors.blue, fontWeight: FontWeight.bold,),
+                ),
+              ],
+            ),
+
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget leaguesPage(List<League> leagues) {
+    return GridView.count(
+      crossAxisCount: 2,
+      children: <Widget>[
+        leagueSummary(leagues[0]),
+      ],
+    );
+
+  }
+
+
+
 }
+
+
 
 //TODO : Implement levels logic
 CircularPercentIndicator levelIndicator (int level, int totalSteps) {
@@ -598,6 +654,8 @@ CircularPercentIndicator mainIndicator(int steps, int goal) {
   );
 
 }
+
+
 
 CircularPercentIndicator homeIndicator(int steps, int goal) {
   return new CircularPercentIndicator(
@@ -811,7 +869,7 @@ Widget homePage(int steps, int goal, DateTime today, List<History> history) {
             ),
             homeIndicator(steps, goal),
             new Text(
-              today.day.toString() + "-" + today.month.toString() + "-" + today.year.toString(),
+              today.day.toString() + "-" + today.month.toString() + "-" + today.year.toString() + "-" + today.minute.toString(),
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.grey.withOpacity(1)),
             ),
             new Card(
@@ -899,7 +957,7 @@ Widget homePage(int steps, int goal, DateTime today, List<History> history) {
                         lineWidth: 10,
                         backgroundColor: Colors.grey.withOpacity(0.2),
                         progressColor: history.isNotEmpty && history.length >= 3 ? ( history[history.length-3].isComplete ? Colors.lightGreenAccent[700]  : Colors.blue ) : Colors.blue,
-                        percent: history.isNotEmpty && history.length >= 3 ? (history[history.length-3].steps < history[history.length-3].goal ? history[history.length-1].steps / history[history.length-3].goal : 1.0) : 0.0,
+                        percent: history.isNotEmpty && history.length >= 3 ? (history[history.length-3].steps < history[history.length-3].goal ? history[history.length-3].steps / history[history.length-3].goal : 1.0) : 0.0,
                         circularStrokeCap: CircularStrokeCap.round,
                         animation: true,
                         center: Column(
@@ -927,7 +985,7 @@ Widget homePage(int steps, int goal, DateTime today, List<History> history) {
                         lineWidth: 10,
                         backgroundColor: Colors.grey.withOpacity(0.2),
                         progressColor: history.isNotEmpty && history.length >= 4 ? ( history[history.length-4].isComplete ? Colors.lightGreenAccent[700]  : Colors.blue ) : Colors.blue,
-                        percent: history.isNotEmpty && history.length >= 4 ? (history[history.length-4].steps < history[history.length-4].goal ? history[history.length-1].steps / history[history.length-4].goal : 1.0) : 0.0,
+                        percent: history.isNotEmpty && history.length >= 4 ? (history[history.length-4].steps < history[history.length-4].goal ? history[history.length-4].steps / history[history.length-4].goal : 1.0) : 0.0,
                         circularStrokeCap: CircularStrokeCap.round,
                         animation: true,
                         center: Column(
@@ -951,7 +1009,7 @@ Widget homePage(int steps, int goal, DateTime today, List<History> history) {
                         lineWidth: 10,
                         backgroundColor: Colors.grey.withOpacity(0.2),
                         progressColor: history.isNotEmpty && history.length >= 5 ? ( history[history.length-5].isComplete ? Colors.lightGreenAccent[700]  : Colors.blue ) : Colors.blue,
-                        percent: history.isNotEmpty && history.length >= 5 ? (history[history.length-5].steps < history[history.length-5].goal ? history[history.length-1].steps / history[history.length-5].goal : 1.0) : 0.0,
+                        percent: history.isNotEmpty && history.length >= 5 ? (history[history.length-5].steps < history[history.length-5].goal ? history[history.length-5].steps / history[history.length-5].goal : 1.0) : 0.0,
                         circularStrokeCap: CircularStrokeCap.round,
                         animation: true,
                         center: Column(
@@ -983,10 +1041,7 @@ Widget homePage(int steps, int goal, DateTime today, List<History> history) {
 }
 
 
-Widget leaguesPage(String currentLeagueName, int steps, int goal, List<Widget> leaderboard, int totalSteps) {
-  return leaguesFocus(currentLeagueName, steps, goal, leaderboard, totalSteps);
-  
-}
+
 
 class History {
   DateTime day;
@@ -1001,6 +1056,28 @@ class History {
       isComplete = true;
     }
   }
+}
+
+class League {
+  int steps;
+  int score;
+  int goal;
+  int multiplier;
+  String name;
+
+  League(int steps, int goal, int multiplier, String name) {
+    this.steps = steps;
+    this.goal = goal;
+    this.multiplier = multiplier;
+    this.name = name;
+  }
+}
+
+class LeagueMember {
+  String name;
+  int steps;
+  int score;
+
 }
 
 class trophyPage extends StatefulWidget {
