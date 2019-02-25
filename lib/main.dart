@@ -24,8 +24,10 @@ int _multiplier = 1;
 
 
 
+
 class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   int _currentIndex = 1;
+
 
   //Animation
   //-----------------------------------------------
@@ -161,6 +163,7 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   bool showGoalOptions = false;
 
 
+
   @override
   Widget build(BuildContext context) {
     leaderboard = [const ListTile(
@@ -203,7 +206,7 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
       )
     ];
     setUpPedometer();
-    League testLeague = new League(steps,goal,2,currentLeagueName);
+    League testLeague = new League(new List<LeagueMember>(), 5000, "testLeague");
     leaguesList.add(testLeague);
     Widget home = homePage(steps, goal, today, history);
     Widget historyScreen = historyPage();
@@ -213,6 +216,7 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
     _screens[0] = historyScreen;
     _screens[2] = leagues;
     _screens[3] = specificLeague;
+
     final double width = MediaQuery.of(context).size.width;
 
     ListView drawerListView = new ListView(
@@ -501,20 +505,34 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
       },
       child: Column(
         children: <Widget>[
-
+          new Padding(padding: EdgeInsets.symmetric(vertical: 5)),
           CircularPercentIndicator(
+            animation: true,
             radius: 170,
             startAngle: 180,
             lineWidth: 12,
             progressColor: Colors.blue,
             backgroundColor: Colors.grey.withOpacity(0.2),
-            percent: league.steps >= league.goal ? 1 : league.steps/league.goal,
+            percent: steps >= league.goal ? 1 : steps/league.goal,
             circularStrokeCap: CircularStrokeCap.round,
+            header: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                new Icon(
+                  Icons.group,
+                  color: Colors.grey,
+                ),
+                new Text(
+                  league.name,
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.grey.withOpacity(1)),
+                ),
+              ],
+            ),
             center: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 new Text(
-                  league.steps.toString(),
+                  steps.toString(),
                   style: TextStyle(fontSize: 30, color: isCompleted ? Colors.lightGreenAccent[700] : Colors.blue, fontWeight: FontWeight.bold,),
                 ),
               ],
@@ -527,11 +545,25 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   }
 
   Widget leaguesPage(List<League> leagues) {
-    return GridView.count(
-      crossAxisCount: 2,
-      children: <Widget>[
-        leagueSummary(leagues[0]),
-      ],
+    return Scaffold(
+      body: GridView.count(
+        crossAxisCount: 2,
+        childAspectRatio: .8,
+        children: <Widget>[
+          leagueSummary(leagues[0]),
+          leagueSummary(leagues[0]),
+          leagueSummary(leagues[0]),
+          leagueSummary(leagues[0]),
+          leagueSummary(leagues[0]),
+          leagueSummary(leagues[0]),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {},
+        child: Icon(
+          Icons.add,
+        ),
+      ),
     );
 
   }
@@ -822,13 +854,7 @@ Widget leaguesFocus(String currentLeagueName, int steps, int goal, List<Widget> 
 
                 ),
                 //Temporarily hardcoded just for visual example and testing ListTile
-                leaderboard[0],
-                leaderboard[1],
-                leaderboard[2],
-                leaderboard[3],
-                leaderboard[4],
-                leaderboard[5],
-                leaderboard[6],
+                Column(children: leaderboard,),
               ],
             ),
           ),
@@ -1059,24 +1085,23 @@ class History {
 }
 
 class League {
-  int steps;
-  int score;
-  int goal;
-  int multiplier;
   String name;
+  int goal;
+  List<LeagueMember> members;
 
-  League(int steps, int goal, int multiplier, String name) {
-    this.steps = steps;
-    this.goal = goal;
-    this.multiplier = multiplier;
+  League(List<LeagueMember> members, int goal, String name) {
+    this.members = members;
     this.name = name;
+    this.goal = goal;
   }
 }
 
 class LeagueMember {
   String name;
+  int userID;
   int steps;
   int score;
+  int multiplier;
 
 }
 
