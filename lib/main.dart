@@ -3,6 +3,9 @@ import 'package:percent_indicator/percent_indicator.dart';
 import 'package:pedometer/pedometer.dart';
 import 'dart:async';
 import 'dart:math';
+import 'League.dart';
+import 'User.dart';
+import 'History.dart';
 
 void main() {
   runApp(new MaterialApp(home: new Scaffold(body: new SamplePage())));
@@ -139,14 +142,14 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
 
   StreamSubscription<int> _subscription;
 
-  _openPage(Widget page) {
-    Navigator.push(
-      context,
-      new MaterialPageRoute(
-        builder: (BuildContext context) => page,
-      ),
-    );
-  }
+//  _openPage(Widget page) {
+//    Navigator.push(
+//      context,
+//      new MaterialPageRoute(
+//        builder: (BuildContext context) => page,
+//      ),
+//    );
+//  }
 
 
   String currentLeagueName = "SWENG 37";
@@ -206,7 +209,7 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
       )
     ];
     setUpPedometer();
-    League testLeague = new League(new List<LeagueMember>(), 5000, "testLeague");
+    League testLeague = new League(new List<User>(), 5000, "testLeague");
     leaguesList.add(testLeague);
     Widget home = homePage(steps, goal, today, history);
     Widget historyScreen = historyPage();
@@ -733,7 +736,7 @@ CircularPercentIndicator homeIndicator(int steps, int goal) {
               ),
               new Padding(
                 padding: EdgeInsets.symmetric(horizontal: 3),
-              ), 
+              ),
               new Text(
                 goal.toString(),
                 style: TextStyle(fontSize: 24, color: Colors.grey.withOpacity(0.8), fontWeight: FontWeight.bold,)
@@ -1069,41 +1072,8 @@ Widget homePage(int steps, int goal, DateTime today, List<History> history) {
 
 
 
-class History {
-  DateTime day;
-  int steps;
-  bool isComplete = false;
-  int goal;
-  History(DateTime day, int steps, int goal) {
-    this.day = day;
-    this.steps = steps;
-    this.goal = goal;
-    if(steps >= goal) {
-      isComplete = true;
-    }
-  }
-}
 
-class League {
-  String name;
-  int goal;
-  List<LeagueMember> members;
 
-  League(List<LeagueMember> members, int goal, String name) {
-    this.members = members;
-    this.name = name;
-    this.goal = goal;
-  }
-}
-
-class LeagueMember {
-  String name;
-  int userID;
-  int steps;
-  int score;
-  int multiplier;
-
-}
 
 class trophyPage extends StatefulWidget {
   @override
