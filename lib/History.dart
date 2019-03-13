@@ -97,7 +97,11 @@ class History {
                   ),
                   new Text(
                     this.steps.toString(),
-                    style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold, fontSize: 50),
+                    style: TextStyle(
+                        color: this.isComplete ? Colors.lightGreenAccent[700] : Colors.blue,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 50
+                    ),
 
                   ),
                 ],
@@ -109,7 +113,7 @@ class History {
                     animation: true,
                     width: 300,
                     lineHeight: 10,
-                    progressColor: Colors.blue,
+                    progressColor: this.isComplete ? Colors.lightGreenAccent : Colors.blue,
                     backgroundColor: Colors.grey.withOpacity(0.2),
                     percent: this.steps >= this.goal ? 1.0 : this.steps/this.goal,
                   ),
@@ -122,7 +126,10 @@ class History {
                       ),
                       new Text(
                         this.goal.toString(),
-                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey
+                        ),
                       )
                     ],
                   )
@@ -140,5 +147,9 @@ class History {
           ),
         )
     );
+  }
+
+  int getSteps() {
+    return this.steps;
   }
 }

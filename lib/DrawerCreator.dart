@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'main.dart';
+import 'main.dart' as main;
 import 'User.dart';
 class DrawerCreator {
   ListView drawerListView;
   Drawer drawer;
 
-  DrawerCreator(User user, BuildContext context) {
+  DrawerCreator(User user, BuildContext context, GlobalKey<main.SamplePageState> key) {
     this.drawerListView = new ListView(
       padding: const EdgeInsets.all(0.0),
       children: <Widget>[
@@ -32,7 +32,7 @@ class DrawerCreator {
                       ),
                     ],
                   ),
-                  levelIndicator(user)
+                  main.levelIndicator(user)
                 ],
               ),
             ),
@@ -46,9 +46,9 @@ class DrawerCreator {
                 style: TextStyle(fontSize: 18, color: Colors.grey[600],),
               ),
               onTap: () {
-                Navigator.push(context, new MaterialPageRoute(
-                    builder: (BuildContext context) => new trophyPage())
-                );
+//                Navigator.push(context, new MaterialPageRoute(
+//                    builder: (BuildContext context) => new trophyPage())
+//                );
               },
             ),
             new ListTile(
@@ -64,7 +64,7 @@ class DrawerCreator {
               ),
               onTap: () {
                 Navigator.pop(context);
-                //toggleGoalOptions();
+                main.toggleGoalOptions();
               },
             ),
 

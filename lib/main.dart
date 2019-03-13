@@ -17,7 +17,7 @@ void main() {
 
 class SamplePage extends StatefulWidget {
   @override
-  _SamplePageState createState() => _SamplePageState();
+  SamplePageState createState() => SamplePageState();
 }
 
 const double RADIUS = 250;
@@ -27,12 +27,12 @@ Color blueDark = Colors.blue[700];
 int _score = 0;
 int _steps = 0;
 int _multiplier = 1;
+bool showGoalOptions = false;
+int numberOfLevels = 50;
 
 
 
-
-
-class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
+class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   int _currentIndex = 1;
 
   AnimationController _controller;
@@ -87,7 +87,6 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   List<History> history = new List();
   List<League> leaguesList = new List();
   //DateTime today = new DateTime(2019, 2, 21);
-  bool showGoalOptions = false;
   User testUser = new User("17330000", "Owen Johnston", 0, 10000, 1, 0, 1);
 
 
@@ -145,8 +144,8 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
     _screens[0] = historyScreen;
     _screens[2] = leagues;
     _screens[3] = specificLeague;
-
-    DrawerCreator drawerCreator = new DrawerCreator(testUser, context);
+    GlobalKey<SamplePageState> key = new GlobalKey<SamplePageState>();
+    DrawerCreator drawerCreator = new DrawerCreator(testUser, context, key);
 
     return Scaffold(
       drawer: drawerCreator.drawer,
@@ -201,10 +200,6 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
           alignment: Alignment.center,
           children: <Widget>[
             Container(
-              constraints: BoxConstraints.expand(),
-              color: Colors.black.withOpacity(0.2),
-            ),
-            Container(
               constraints: BoxConstraints.expand(height: 400, width: 300),
               decoration: new BoxDecoration(
                 color: Colors.white,
@@ -216,6 +211,13 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                 borderRadius: new BorderRadius.all(
                   new Radius.circular(5),
                 ),
+                boxShadow: <BoxShadow>[
+                  BoxShadow(
+                    color: Colors.grey,
+                    offset: Offset(1.0, 6.0),
+                    blurRadius: 40.0,
+                  ),
+                ],
               ),
               child: Column(
                 children: <Widget>[
@@ -295,6 +297,7 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
         print(testUser.getStepHistory()[i].steps.toString() + "  index:" + i.toString());
       }
       testUser.setLifetimeSteps(testUser.getLifetimeSteps() + testUser.getSteps());
+      testUser.updateLevel();
       isCompleted = false;
       //totalSteps = 0;
     });
@@ -344,18 +347,6 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
       isCompleted = true;
     });
   }
-
-  void toggleGoalOptions() {
-    setState(() {
-      if(showGoalOptions) {
-        showGoalOptions = false;
-      }
-      else {
-        showGoalOptions = true;
-      }
-    });
-  }
-
 
   InkWell leagueSummary(League league) {
     return new InkWell(
@@ -439,8 +430,9 @@ CircularPercentIndicator levelIndicator (User user) {
   return new CircularPercentIndicator(
     radius: 200,
     startAngle: 180,
-    percent: user.getLifetimeSteps()/15000,
+    percent: user.percentToNextLevel(),
     backgroundColor: Colors.blue[900],
+    animation: true,
     progressColor: Colors.lightBlueAccent[100],
     circularStrokeCap: CircularStrokeCap.round,
     lineWidth: 12,
@@ -722,13 +714,62 @@ Widget leaguesFocus(String currentLeagueName, int steps, int goal, List<Widget> 
   ));
 }
 
+Widget historyGraph(User user) {
+  List<LinearPercentIndicator> lines = new List(30);
+  List<History> last30Days = user.historyLast30Days();
+  double pixelToStepsRatio = 260 / user.highestStepCountFromList(last30Days);
+  for(int i = 0; i < lines.length; i++) {
+    lines[i] = lineInGraph(last30Days[i], pixelToStepsRatio);
+  }
+  return(
+    new RotatedBox(
+      quarterTurns: 3,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: lines,
+      ),
+    )
+  );
+}
+
+LinearPercentIndicator lineInGraph (History history, double pixelToStepsRatio) {
+  int historySteps = 0;
+  if(history != null) {
+    historySteps = history.getSteps();
+  }
+  return(
+    LinearPercentIndicator(
+//      width: 260,
+      width: historySteps * pixelToStepsRatio,
+      progressColor: Colors.white,
+      backgroundColor: Colors.blue.withOpacity(0),
+      lineHeight: 4,
+      percent: 1.0,
+      animation: true,
+    )
+  );
+}
+
 Widget historyPage(User user) {
   return(
     ListView(
       children: <Widget>[
-
+        Container(
+          height: 300,
+          decoration: new BoxDecoration(
+            gradient: new LinearGradient(
+                begin: FractionalOffset.bottomCenter,
+                end: FractionalOffset.topCenter,
+                colors: [
+                  Colors.lightBlueAccent,
+                  Colors.blueAccent,
+                ]
+            )
+          ),
+          child: historyGraph(user),
+        ),
         Column(
-            children: user.getHistoryAsCardWidgets()
+            children: user.getHistoryAsCardWidgets().isNotEmpty ? user.getHistoryAsCardWidgets() : <Widget> [new Padding(padding: EdgeInsets.symmetric(vertical: 10)), new Text("No history to show.", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),)]
         ),
       ],
     )
@@ -932,10 +973,14 @@ Widget homePage(User user, DateTime today) {
   );
 }
 
-
-
-
-
+void toggleGoalOptions() {
+  if(showGoalOptions) {
+    showGoalOptions = false;
+  }
+  else {
+    showGoalOptions = true;
+  }
+}
 
 
 class trophyPage extends StatefulWidget {
@@ -961,6 +1006,8 @@ class _tempGoalsState extends State<tempGoalsPage> {
     return null;
   }
 }
+
+
 
 
 
