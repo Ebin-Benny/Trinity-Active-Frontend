@@ -7,6 +7,8 @@ import 'League.dart';
 import 'User.dart';
 import 'History.dart';
 import 'DrawerCreator.dart';
+import 'package:charts_flutter/flutter.dart' as charts;
+
 
 
 void main() {
@@ -136,7 +138,7 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
     leaguesList.add(testLeague);
     testUser.setStepHistory(history);
     Widget home = homePage(testUser, today);
-    Widget historyScreen = historyPage();
+    Widget historyScreen = historyPage(testUser);
     Widget leagues = leaguesPage(leaguesList);
     Widget specificLeague = leaguesFocus(currentLeagueName, steps, goal, leaderboard, totalSteps, testUser);
     _screens[1] = home;
@@ -287,6 +289,7 @@ class _SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   void newDay() {
     setState(() {
       testUser.addHistoryEntry(new History(today, testUser.getSteps(), testUser.getPersonalGoal()));
+      testUser.addHistoryAsCardWidget(new History(today, testUser.getSteps(), testUser.getPersonalGoal()));
       print(testUser.getStepHistory().length);
       for(int i = 0; i < history.length; i++) {
         print(testUser.getStepHistory()[i].steps.toString() + "  index:" + i.toString());
@@ -719,10 +722,16 @@ Widget leaguesFocus(String currentLeagueName, int steps, int goal, List<Widget> 
   ));
 }
 
-Widget historyPage() {
-  Container(
-    alignment: Alignment.center,
-    color: Colors.grey,
+Widget historyPage(User user) {
+  return(
+    ListView(
+      children: <Widget>[
+
+        Column(
+            children: user.getHistoryAsCardWidgets()
+        ),
+      ],
+    )
   );
 }
 
@@ -751,10 +760,10 @@ Widget homePage(User user, DateTime today) {
                 ]
             ),
             homeIndicator(user),
-            new Text(
-              today.day.toString() + "-" + today.month.toString() + "-" + today.year.toString() + "-" + today.minute.toString(),
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.grey.withOpacity(1)),
-            ),
+//            new Text(
+//              today.day.toString() + "-" + today.month.toString() + "-" + today.year.toString() + "-" + today.minute.toString(),
+//              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.grey.withOpacity(1)),
+//            ),
             new Card(
               child: Column(
                 children: <Widget>[

@@ -1,4 +1,5 @@
 import 'History.dart';
+import 'package:flutter/material.dart';
 
 class User {
   String name = "";
@@ -9,6 +10,7 @@ class User {
   List<History> stepHistory;
   int personalGoal = 0;
   int level = 0;
+  List<Widget> historyAsCardWidgets = new List();
 
   User(String userID, String name, int steps, int personalGoal, int multiplier, int lifetimeSteps, int level) {
     this.name = name;
@@ -77,5 +79,20 @@ class User {
 
   void addHistoryEntry(History history) {
     this.stepHistory.add(history);
+  }
+
+  void historyToCardWidgets() {
+    for(int i = 0; i < this.stepHistory.length; i++) {
+      this.historyAsCardWidgets.add(this.stepHistory[i].toWidget());
+    }
+
+  }
+
+  List<Widget> getHistoryAsCardWidgets() {
+    return this.historyAsCardWidgets;
+  }
+
+  void addHistoryAsCardWidget(History history) {
+    this.historyAsCardWidgets.add(history.toWidget());
   }
 }
