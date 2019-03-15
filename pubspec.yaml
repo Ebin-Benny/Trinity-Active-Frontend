@@ -16,6 +16,7 @@ dependencies:
   percent_indicator: ^1.0.13
   pedometer: ^0.0.5
   charts_flutter: ^0.6.0
+  flutter_signin_button: ^0.2.6
   flutter:
     sdk: flutter
 
@@ -40,6 +41,7 @@ flutter:
     - images/sparkles.png
     - images/trophy.png
     - images/bullseye-arrow.png
+    - images/TrinityActive-logo.png
 
 
   # The following line ensures that the Material Icons font is

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'main.dart' as main;
 import 'User.dart';
+import 'LoginPage.dart';
+
 class DrawerCreator {
   ListView drawerListView;
   Drawer drawer;
 
-  DrawerCreator(User user, BuildContext context, GlobalKey<main.SamplePageState> key) {
+  DrawerCreator(User user, BuildContext context) {
     this.drawerListView = new ListView(
       padding: const EdgeInsets.all(0.0),
       children: <Widget>[
@@ -65,6 +67,18 @@ class DrawerCreator {
               onTap: () {
                 Navigator.pop(context);
                 main.toggleGoalOptions();
+              },
+            ),
+            new ListTile(
+              leading: Icon(Icons.account_circle),
+              title: new Text(
+                "Log Out",
+                style: TextStyle(fontSize: 18, color: Colors.grey[600],),
+              ),
+              //TODO : Actually implement login, this only to show how LoginPage looks
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()));
               },
             ),
 

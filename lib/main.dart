@@ -8,6 +8,7 @@ import 'User.dart';
 import 'History.dart';
 import 'DrawerCreator.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
+import 'LoginPage.dart';
 
 
 
@@ -29,10 +30,12 @@ int _steps = 0;
 int _multiplier = 1;
 bool showGoalOptions = false;
 int numberOfLevels = 50;
+bool _isLoggedIn = false;
 
 
 
 class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
+
   int _currentIndex = 1;
 
   AnimationController _controller;
@@ -63,7 +66,6 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   //Animation
 
 
-
   StreamSubscription<int> _subscription;
 
 //  _openPage(Widget page) {
@@ -88,7 +90,6 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   List<League> leaguesList = new List();
   //DateTime today = new DateTime(2019, 2, 21);
   User testUser = new User("17330000", "Owen Johnston", 0, 10000, 1, 0, 1);
-
 
 
   @override
@@ -144,9 +145,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
     _screens[0] = historyScreen;
     _screens[2] = leagues;
     _screens[3] = specificLeague;
-    GlobalKey<SamplePageState> key = new GlobalKey<SamplePageState>();
-    DrawerCreator drawerCreator = new DrawerCreator(testUser, context, key);
-
+    DrawerCreator drawerCreator = new DrawerCreator(testUser, context);
     return Scaffold(
       drawer: drawerCreator.drawer,
       appBar: new AppBar(
@@ -176,6 +175,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
         onTap: (int index) {
           setState(() {
             _currentIndex = index;
+
             //increment(null);
           });
         },
