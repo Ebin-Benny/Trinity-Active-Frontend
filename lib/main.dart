@@ -305,6 +305,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
 
 
   void setUpPedometer() {
+
     Pedometer pedometer = new Pedometer();
     _subscription = pedometer.stepCountStream.listen(_onData,
         onError: _onError, onDone: _onDone, cancelOnError: true);
