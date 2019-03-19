@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
+import 'main.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -37,7 +38,9 @@ class LoginPageState extends State<LoginPage> {
             new SignInButton(
                 Buttons.GoogleDark,
                 onPressed: () {
-                  Navigator.pop(context);
+                  setLogInState(true);
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => SamplePage()));
+//                  Navigator.pop(context);
                 }
             ),
 

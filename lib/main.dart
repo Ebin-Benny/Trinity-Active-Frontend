@@ -11,16 +11,6 @@ import 'package:charts_flutter/flutter.dart' as charts;
 import 'LoginPage.dart';
 
 
-
-void main() {
-  runApp(new MaterialApp(home: new Scaffold(body: new SamplePage())));
-}
-
-class SamplePage extends StatefulWidget {
-  @override
-  SamplePageState createState() => SamplePageState();
-}
-
 const double RADIUS = 250;
 bool isCompleted = false;
 Color blue = Colors.blue;
@@ -31,6 +21,15 @@ int _multiplier = 1;
 bool showGoalOptions = false;
 int numberOfLevels = 50;
 bool _isLoggedIn = false;
+
+void main() {
+  runApp(new MaterialApp(home: new Scaffold(body: new LoginPage())));
+}
+
+class SamplePage extends StatefulWidget {
+  @override
+  SamplePageState createState() => SamplePageState();
+}
 
 
 
@@ -722,13 +721,26 @@ Widget historyGraph(User user) {
     lines[i] = lineInGraph(last30Days[i], pixelToStepsRatio);
   }
   return(
-    new RotatedBox(
-      quarterTurns: 3,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: lines,
-      ),
-    )
+      Container(
+        height: 300,
+        decoration: new BoxDecoration(
+            gradient: new LinearGradient(
+                begin: FractionalOffset.bottomCenter,
+                end: FractionalOffset.topCenter,
+                colors: [
+                  Colors.lightBlueAccent,
+                  Colors.blueAccent,
+                ]
+            )
+        ),
+        child: new RotatedBox(
+          quarterTurns: 3,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: lines,
+          ),
+        ),
+      )
   );
 }
 
@@ -754,20 +766,7 @@ Widget historyPage(User user) {
   return(
     ListView(
       children: <Widget>[
-        Container(
-          height: 300,
-          decoration: new BoxDecoration(
-            gradient: new LinearGradient(
-                begin: FractionalOffset.bottomCenter,
-                end: FractionalOffset.topCenter,
-                colors: [
-                  Colors.lightBlueAccent,
-                  Colors.blueAccent,
-                ]
-            )
-          ),
-          child: historyGraph(user),
-        ),
+        historyGraph(user),
         Column(
             children: user.getHistoryAsCardWidgets().isNotEmpty ? user.getHistoryAsCardWidgets() : <Widget> [new Padding(padding: EdgeInsets.symmetric(vertical: 10)), new Text("No history to show.", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),)]
         ),
@@ -982,30 +981,10 @@ void toggleGoalOptions() {
   }
 }
 
-
-class trophyPage extends StatefulWidget {
-  @override
-  _trophyPageState createState() => _trophyPageState();
+void setLogInState(bool state) {
+  _isLoggedIn = state;
 }
 
-class _trophyPageState extends State<trophyPage> {
-  @override
-  Widget build(BuildContext context) {
-    return null;
-  }
-}
-
-class tempGoalsPage extends StatefulWidget {
-  @override
-  _tempGoalsState createState() => _tempGoalsState();
-}
-
-class _tempGoalsState extends State<tempGoalsPage> {
-  @override
-  Widget build(BuildContext context) {
-    return null;
-  }
-}
 
 
 
