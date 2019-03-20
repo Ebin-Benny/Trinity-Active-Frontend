@@ -1,5 +1,6 @@
 import 'History.dart';
 import 'package:flutter/material.dart';
+import 'League.dart';
 
 class User {
   String name = "";
@@ -10,6 +11,7 @@ class User {
   List<History> stepHistory;
   int personalGoal = 0;
   int level = 0;
+  List<League> leagues = new List();
   List<Widget> historyAsCardWidgets = new List();
   List<int> levelStepRequirements = new List(50);
 
@@ -20,6 +22,7 @@ class User {
     this.multiplier = multiplier;
     this.lifetimeSteps = lifetimeSteps;
     this.level = level;
+    leagues.add(new League(null, 20000, "test"));
   }
 
   void setName(String name) {

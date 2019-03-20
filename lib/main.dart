@@ -19,6 +19,7 @@ int _score = 0;
 int _steps = 0;
 int _multiplier = 1;
 bool showGoalOptions = false;
+bool showLeagueOptions = false;
 int numberOfLevels = 50;
 bool _isLoggedIn = false;
 
@@ -82,13 +83,14 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   int totalSteps = 0;
   int goal = 10000;
   int level = 1;
-  List<Widget> _screens = new List(4);
+  List<Widget> _screens = new List(5);
   List<Widget> leaderboard =  new List(7);
   DateTime today = new DateTime.now();
   List<History> history = new List();
   List<League> leaguesList = new List();
   //DateTime today = new DateTime(2019, 2, 21);
-  User testUser = new User("17330000", "Owen Johnston", 0, 10000, 1, 0, 1);
+  static User testUser = new User("17330000", "Owen Johnston", 0, 10000, 1, 0, 1);
+  List<InkWell> leaguesAsWidgets = new List(testUser.leagues.length);
 
 
   @override
@@ -133,17 +135,14 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
       )
     ];
     setUpPedometer();
-    League testLeague = new League(new List<User>(), 5000, "testLeague");
-    leaguesList.add(testLeague);
     testUser.setStepHistory(history);
     Widget home = homePage(testUser, today);
     Widget historyScreen = historyPage(testUser);
-    Widget leagues = leaguesPage(leaguesList);
-    Widget specificLeague = leaguesFocus(currentLeagueName, steps, goal, leaderboard, totalSteps, testUser);
+    Widget leagues = leaguesPage(testUser.leagues);
     _screens[1] = home;
     _screens[0] = historyScreen;
     _screens[2] = leagues;
-    _screens[3] = specificLeague;
+    _screens[4] = addLeaguePage();
     DrawerCreator drawerCreator = new DrawerCreator(testUser, context);
     return Scaffold(
       drawer: drawerCreator.drawer,
@@ -170,7 +169,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
 
       bottomNavigationBar:
       BottomNavigationBar(
-        currentIndex: _currentIndex == 3 ? 2 : _currentIndex,
+        currentIndex: _currentIndex == 3 || _currentIndex == 4 ? 2 : _currentIndex,
         onTap: (int index) {
           setState(() {
             _currentIndex = index;
@@ -190,6 +189,104 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
               title: Text("Leagues"))
         ],
       ),
+    );
+  }
+
+  Widget leagueOptions() {
+    return new  Center(
+        child: Stack(
+          alignment: Alignment.center,
+          children: <Widget>[
+            Container(
+              constraints: BoxConstraints.expand(height: 400, width: 300),
+              decoration: new BoxDecoration(
+                color: Colors.white,
+                border: new Border.all(
+                  color: Colors.white,
+                  width: 5,
+                  style: BorderStyle.solid,
+                ),
+                borderRadius: new BorderRadius.all(
+                  new Radius.circular(5),
+                ),
+                boxShadow: <BoxShadow>[
+                  BoxShadow(
+                    color: Colors.grey,
+                    offset: Offset(1.0, 6.0),
+                    blurRadius: 40.0,
+                  ),
+                ],
+              ),
+              child: Column(
+                children: <Widget>[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: <Widget>[
+                      IconButton(
+                        icon: Icon(Icons.close),
+                        onPressed: toggleLeagueOptions,
+                      )
+                    ],
+                  ),
+                  Icon(
+                    Icons.group_add,
+                    size: 80,
+                    color: Colors.blue,
+                  ),
+                  new Padding(padding: EdgeInsets.symmetric(vertical: 5)),
+                  new Text(
+                    "ENTER LEAGUE ID",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: Colors.grey.withOpacity(1)),
+
+                  ),
+                  new Padding(padding: EdgeInsets.symmetric(vertical: 10)),
+                  Container(
+                    width: 200,
+                    child: new TextField(
+                      controller: textController,
+                      textAlign: TextAlign.center,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.grey.withOpacity(0.1),
+                        //hintText: "league id",
+                      ),
+                    ),
+                  ),
+                  new Padding(padding: EdgeInsets.symmetric(vertical: 10)),
+                  new Text(
+                    "OR",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.grey.withOpacity(1)),
+                  ),
+                  RaisedButton(
+                    onPressed: () {
+                      toggleLeagueOptions();
+                      _currentIndex = 4;
+                    },
+                    child: Text(
+                      "CREATE NEW LEAGUE",
+                      style: TextStyle(color: Colors.white),
+
+                    ),
+                    color: Colors.blue,
+                  ),
+                  new Padding(padding: EdgeInsets.symmetric(vertical: 10)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: <Widget>[
+                      FloatingActionButton(
+                        child: Icon(Icons.check),
+                        onPressed: () {
+                          toggleLeagueOptions();
+                        },
+                      ),
+                    ],
+                  )
+
+                ],
+              ),
+            ),
+          ],
+        )
     );
   }
 
@@ -351,43 +448,66 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
     return new InkWell(
       splashColor: Colors.blue.withOpacity(0.2),
       onTap: () {
+        _screens[3] = leaguesFocus(league, leaderboard, testUser);
         _currentIndex = 3;
       },
       child: Column(
         children: <Widget>[
           new Padding(padding: EdgeInsets.symmetric(vertical: 5)),
-          CircularPercentIndicator(
-            animation: true,
-            radius: 170,
-            startAngle: 180,
-            lineWidth: 12,
-            progressColor: isCompleted ? Colors.lightGreenAccent[400] : Colors.blue,
-            backgroundColor: Colors.grey.withOpacity(0.2),
-            percent: testUser.getSteps() >= league.goal ? 1 : testUser.getSteps()/league.goal,
-            circularStrokeCap: CircularStrokeCap.round,
-            header: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                new Icon(
-                  Icons.group,
-                  color: Colors.grey,
+          Stack(
+            children: <Widget>[
+              CircularPercentIndicator(
+                animation: true,
+                radius: 170,
+                startAngle: 180,
+                lineWidth: 12,
+                progressColor: isCompleted ? Colors.lightGreenAccent[400] : Colors.blue,
+                backgroundColor: Colors.grey.withOpacity(0.2),
+                percent: testUser.getSteps() >= league.goal ? 1 : testUser.getSteps()/league.goal,
+                circularStrokeCap: CircularStrokeCap.round,
+                header: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    new Icon(
+                      Icons.group,
+                      color: Colors.grey,
+                    ),
+                    new Text(
+                      league.name,
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.grey.withOpacity(1)),
+                    ),
+                  ],
                 ),
-                new Text(
-                  league.name,
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.grey.withOpacity(1)),
+                center: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    new Text(
+                      testUser.getSteps().toString(),
+                      style: TextStyle(fontSize: 30, color: isCompleted ? Colors.lightGreenAccent[700] : Colors.blue, fontWeight: FontWeight.bold,),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            center: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                new Text(
-                  testUser.getSteps().toString(),
-                  style: TextStyle(fontSize: 30, color: isCompleted ? Colors.lightGreenAccent[700] : Colors.blue, fontWeight: FontWeight.bold,),
-                ),
-              ],
-            ),
-
+              ),
+              Align(
+                child: Column(
+                  children: <Widget>[
+                    new Padding(padding: EdgeInsets.symmetric(vertical: 90)),
+                    Container(
+                      color: isCompleted ? Colors.lightGreenAccent[700] : Colors.blue[700],
+                      width: 40,
+                      height: 27,
+                      child: Center(
+                        child: Text(
+                          "x2",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold,),
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              ),
+            ],
           ),
         ],
       ),
@@ -395,33 +515,28 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   }
 
   Widget leaguesPage(List<League> leagues) {
+    for(int i = 0; i < leagues.length; i++) {
+      this.leaguesAsWidgets[i] = leagueSummary(leagues[i]);
+    }
     return Scaffold(
       body: GridView.count(
         crossAxisCount: 2,
         childAspectRatio: .8,
-        children: <Widget>[
-          leagueSummary(leagues[0]),
-          leagueSummary(leagues[0]),
-          leagueSummary(leagues[0]),
-          leagueSummary(leagues[0]),
-          leagueSummary(leagues[0]),
-          leagueSummary(leagues[0]),
-        ],
+        children: this.leaguesAsWidgets,
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+      floatingActionButton: showLeagueOptions ? leagueOptions() : FloatingActionButton(
+        onPressed: () {
+          toggleLeagueOptions();
+        },
         child: Icon(
           Icons.add,
         ),
       ),
+      floatingActionButtonLocation: showLeagueOptions ? FloatingActionButtonLocation.centerDocked : null,
     );
 
   }
-
-
-
 }
-
 
 
 //TODO : Implement levels logic
@@ -469,72 +584,94 @@ CircularPercentIndicator levelIndicator (User user) {
 }
 
 //TODO : Figure out how we are going to store the steps and goal values
-CircularPercentIndicator mainIndicator(User user) {
+Widget leagueIndicator(User user, League league) {
   int score = user.getSteps() * 2;
-  return new CircularPercentIndicator(
-    startAngle: 180,
-    radius: RADIUS,
-    lineWidth: 15,
-    animation: true,
-    percent: user.getSteps() < user.getPersonalGoal() ? user.getSteps() / user.getPersonalGoal() : 1,
-    center: Column(
-      children: <Widget>[
-        new Padding(
-          padding: EdgeInsets.symmetric(vertical: 40),
-        ),
-        new Text(
-        "SCORE".toString(),
-          style: TextStyle(fontSize: 18, color: Colors.grey.withOpacity(0.5), fontWeight: FontWeight.bold,),
-        ),
-        new Text(
-          score.toString(),
-          style: TextStyle(fontSize: 50, color: isCompleted ? Colors.lightGreenAccent[700] : Colors.blue, fontWeight: FontWeight.bold,),
-        ),
-        new Text(
-          "STEPS",
-          style: TextStyle(fontSize: 18, color: Colors.grey.withOpacity(0.5), fontWeight: FontWeight.bold,),
-        ),
-        new Text(
-          user.getSteps().toString(),
-          style: TextStyle(fontSize: 24, color: isCompleted ? Colors.lightGreenAccent[700] : Colors.blue, fontWeight: FontWeight.bold,),
-        ),
-      ],
-    ),
-    footer: Column(
-      children: <Widget>[
-        new Padding(padding: EdgeInsets.symmetric(vertical: 7)),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+
+  return new Stack(
+    children: <Widget>[
+      CircularPercentIndicator(
+        startAngle: 180,
+        radius: RADIUS,
+        lineWidth: 15,
+        animation: true,
+        percent: user.getSteps() < league.goal ? user.getSteps() / league.goal : 1,
+        center: Column(
           children: <Widget>[
-            Image.asset(
-              'images/goal_image.png',
-              height: 30,
-              width: 25,
-            ),
             new Padding(
-              padding: EdgeInsets.symmetric(horizontal: 3),
+              padding: EdgeInsets.symmetric(vertical: 40),
             ),
             new Text(
-                user.getPersonalGoal().toString(),
-                style: TextStyle(fontSize: 24, color: Colors.grey.withOpacity(0.8), fontWeight: FontWeight.bold,)
+              "SCORE".toString(),
+              style: TextStyle(fontSize: 18, color: Colors.grey.withOpacity(0.5), fontWeight: FontWeight.bold,),
             ),
-            new Padding(
-              padding: EdgeInsets.symmetric(horizontal: 3),
+            new Text(
+              score.toString(),
+              style: TextStyle(fontSize: 50, color: isCompleted ? Colors.lightGreenAccent[700] : Colors.blue, fontWeight: FontWeight.bold,),
             ),
-            Image.asset(
-              'images/steps_image.png',
-              height: 30,
-              width: 25,
+            new Text(
+              "STEPS",
+              style: TextStyle(fontSize: 18, color: Colors.grey.withOpacity(0.5), fontWeight: FontWeight.bold,),
+            ),
+            new Text(
+              user.getSteps().toString(),
+              style: TextStyle(fontSize: 24, color: isCompleted ? Colors.lightGreenAccent[700] : Colors.blue, fontWeight: FontWeight.bold,),
             ),
           ],
         ),
-      ],
-    ),
-    circularStrokeCap: CircularStrokeCap.round,
-    progressColor: isCompleted ? Colors.lightGreenAccent[400] : Colors.blue,
-    backgroundColor: Colors.grey.withOpacity(0.2),
-
+        footer: Column(
+          children: <Widget>[
+            new Padding(padding: EdgeInsets.symmetric(vertical: 7)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Image.asset(
+                  'images/goal_image.png',
+                  height: 30,
+                  width: 25,
+                ),
+                new Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 3),
+                ),
+                new Text(
+                    league.goal.toString(),
+                    style: TextStyle(fontSize: 24, color: Colors.grey.withOpacity(0.8), fontWeight: FontWeight.bold,)
+                ),
+                new Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 3),
+                ),
+                Image.asset(
+                  'images/steps_image.png',
+                  height: 30,
+                  width: 25,
+                ),
+              ],
+            ),
+          ],
+        ),
+        circularStrokeCap: CircularStrokeCap.round,
+        progressColor: isCompleted ? Colors.lightGreenAccent[400] : Colors.blue,
+        backgroundColor: Colors.grey.withOpacity(0.2),
+      ),
+      Positioned(
+        top: RADIUS-22,
+        left: RADIUS/2 - 30,
+        child: Container(
+          color: isCompleted ? Colors.lightGreenAccent[700] : Colors.blue[700],
+          width: 60,
+          height: 40,
+          child: Center(
+            child: Text(
+              "x2",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold,),
+            ),
+          ),
+        ),
+      ),
+    ],
   );
+
+
 
 }
 
@@ -609,7 +746,7 @@ CircularPercentIndicator homeIndicator(User user) {
 
 
 //Made this it's own entire widget so we can control what widgets are displayed(for changing screens)
-Widget leaguesFocus(String currentLeagueName, int steps, int goal, List<Widget> leaderboard, int totalSteps, User user) {
+Widget leaguesFocus(League league, List<Widget> leaderboard, User user) {
   return (Center(
     child: ListView(
         children: <Widget>[
@@ -624,7 +761,7 @@ Widget leaguesFocus(String currentLeagueName, int steps, int goal, List<Widget> 
                   padding: EdgeInsets.symmetric(horizontal: 2),
                 ),
                 new Text(
-                  currentLeagueName,
+                  league.name,
                   textAlign: TextAlign.center,
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: Colors.grey.withOpacity(1)),
                 ),
@@ -636,27 +773,7 @@ Widget leaguesFocus(String currentLeagueName, int steps, int goal, List<Widget> 
                 Icon(
                   Icons.arrow_back_ios,
                   color: Colors.grey.withOpacity(0.8),),
-                Stack(
-                  children: <Widget>[
-                    mainIndicator(user),
-                    Positioned(
-                      top: RADIUS-22,
-                      left: RADIUS/2 - 30,
-                      child: Container(
-                        color: isCompleted ? Colors.lightGreenAccent[700] : Colors.blue[700],
-                        width: 60,
-                        height: 40,
-                        child: Center(
-                          child: Text(
-                            "x2",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold,),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                leagueIndicator(user, league),
                 Icon(
                   Icons.arrow_forward_ios,
                   color: Colors.grey.withOpacity(0.8),)
@@ -716,7 +833,8 @@ Widget leaguesFocus(String currentLeagueName, int steps, int goal, List<Widget> 
 Widget historyGraph(User user) {
   List<LinearPercentIndicator> lines = new List(30);
   List<History> last30Days = user.historyLast30Days();
-  double pixelToStepsRatio = 260 / user.highestStepCountFromList(last30Days);
+  int highestStepCount = user.highestStepCountFromList(last30Days);
+  double pixelToStepsRatio = 260 / highestStepCount;
   for(int i = 0; i < lines.length; i++) {
     lines[i] = lineInGraph(last30Days[i], pixelToStepsRatio);
   }
@@ -733,12 +851,50 @@ Widget historyGraph(User user) {
                 ]
             )
         ),
-        child: new RotatedBox(
-          quarterTurns: 3,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: lines,
-          ),
+        child: Stack(
+          children: <Widget>[
+            Column(
+              children: <Widget>[
+                new Padding(padding: EdgeInsets.symmetric(vertical: 10)),
+                new Align(
+                  alignment: Alignment.topCenter,
+                  child: Column(
+                    children: <Widget>[
+                      Container(
+                        child: new Text(
+                          highestStepCount.toString(),
+                          style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
+                        ),
+                        decoration: new BoxDecoration(
+                          color: Colors.white,
+                          border: new Border.all(
+                            color: Colors.white,
+                            width: 5,
+                            style: BorderStyle.solid,
+                          ),
+                          borderRadius: new BorderRadius.vertical(
+                            top: new Radius.circular(5),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  height: 2,
+                  color: Colors.white.withOpacity(0.5)
+                ),
+
+              ],
+            ),
+            new RotatedBox(
+              quarterTurns: 3,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: lines,
+              ),
+            ),
+          ],
         ),
       )
   );
@@ -759,6 +915,45 @@ LinearPercentIndicator lineInGraph (History history, double pixelToStepsRatio) {
       percent: 1.0,
       animation: true,
     )
+  );
+}
+
+Widget addLeaguePage() {
+  return Column(
+    children: <Widget>[
+      Container(
+        height: 200,
+        decoration: new BoxDecoration(
+            gradient: new LinearGradient(
+                begin: FractionalOffset.bottomCenter,
+                end: FractionalOffset.topCenter,
+                colors: [
+                  Colors.lightBlueAccent,
+                  Colors.blueAccent,
+                ]
+            )
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            new Text(
+                "CREATE LEAGUE",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: Colors.white),
+            ),
+            new Padding(padding: EdgeInsets.symmetric(vertical: 10)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Icon(
+                  Icons.group,
+                ),
+                
+              ],
+            ),
+          ],
+        ),
+      ),
+    ],
   );
 }
 
@@ -975,10 +1170,25 @@ Widget homePage(User user, DateTime today) {
 void toggleGoalOptions() {
   if(showGoalOptions) {
     showGoalOptions = false;
+    print("dont show");
   }
   else {
     showGoalOptions = true;
+    print("show");
   }
+
+}
+
+void toggleLeagueOptions() {
+  if(showLeagueOptions) {
+    showLeagueOptions = false;
+    print("dont show");
+  }
+  else {
+    showLeagueOptions = true;
+    print("show");
+  }
+
 }
 
 void setLogInState(bool state) {
