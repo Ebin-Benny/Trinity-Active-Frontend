@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:pedometer/pedometer.dart';
 import 'dart:async';
@@ -9,6 +10,7 @@ import 'History.dart';
 import 'DrawerCreator.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'LoginPage.dart';
+import 'package:clipboard_manager/clipboard_manager.dart';
 
 
 const double RADIUS = 250;
@@ -89,7 +91,8 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   List<History> history = new List();
   List<League> leaguesList = new List();
   //DateTime today = new DateTime(2019, 2, 21);
-  static User testUser = new User("17330000", "Owen Johnston", 0, 10000, 1, 0, 1);
+//  static User testUser = new User("17330000", "Owen Johnston", 0, 10000, 1, 0, 1);
+  static User testUser = new User("0", "not logged in", 0, 0, 0, 0, 0);
   List<InkWell> leaguesAsWidgets = new List(testUser.leagues.length);
 
 
@@ -142,7 +145,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
     _screens[1] = home;
     _screens[0] = historyScreen;
     _screens[2] = leagues;
-    _screens[4] = addLeaguePage();
+    _screens[4] = addLeaguePage(context);
     DrawerCreator drawerCreator = new DrawerCreator(testUser, context);
     return Scaffold(
       drawer: drawerCreator.drawer,
@@ -166,7 +169,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       body:  _screens[_currentIndex],
 
-
+      
       bottomNavigationBar:
       BottomNavigationBar(
         currentIndex: _currentIndex == 3 || _currentIndex == 4 ? 2 : _currentIndex,
@@ -375,6 +378,12 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
     setState(() {
       testUser.setSteps(testUser.getSteps() + 1);
     });
+  }
+
+  void setUser(User user) {
+    testUser = user;
+    print(testUser.name);
+    print("^^name^^");
   }
 
   void setGoal(int newGoal) {
@@ -918,11 +927,12 @@ LinearPercentIndicator lineInGraph (History history, double pixelToStepsRatio) {
   );
 }
 
-Widget addLeaguePage() {
+Widget addLeaguePage(BuildContext context) {
   return Column(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: <Widget>[
       Container(
-        height: 200,
+        height: 160,
         decoration: new BoxDecoration(
             gradient: new LinearGradient(
                 begin: FractionalOffset.bottomCenter,
@@ -947,12 +957,95 @@ Widget addLeaguePage() {
                 Icon(
                   Icons.group,
                 ),
-                
               ],
             ),
           ],
         ),
       ),
+      new Text(
+        "SET DAILY STEP GOAL",
+        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.grey),
+      ),
+
+      new Text(
+          "SET DURATION OF LEAGUE",
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.grey),
+      ),
+      Container(
+        height: 100,
+        decoration: new BoxDecoration(
+            gradient: new LinearGradient(
+                begin: FractionalOffset.bottomCenter,
+                end: FractionalOffset.topCenter,
+                colors: [
+                  Colors.lightBlueAccent[100],
+                  Colors.lightBlueAccent,
+                ]
+            )
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Container(
+                  width: 200,
+                  height: 60,
+                  decoration: new BoxDecoration(
+                    color: Colors.white,
+                    border: new Border.all(
+                      color: Colors.white,
+                      width: 5,
+                      style: BorderStyle.solid,
+                    ),
+                    borderRadius: new BorderRadius.all(
+                      new Radius.circular(5),
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      new Text(
+                        "aJk4Tz",
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30, color: Colors.black.withOpacity(0.6)),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+                new Padding(padding: EdgeInsets.symmetric(horizontal: 5)),
+                IconButton(
+                  icon: Icon(
+                    Icons.content_copy,
+                    color: Colors.white.withOpacity(0.8),
+                    size: 45,
+                  ),
+                  onPressed: () {
+                    ClipboardData data = new ClipboardData(text: "aJk4Tz");
+                    Clipboard.setData(data);
+                    final snackBar = SnackBar(
+                      content: Text('Yay! A SnackBar!'),
+                      action: SnackBarAction(
+                        label: 'Undo',
+                        onPressed: () {
+                          // Some code to undo the change!
+                        },
+                      ),
+                    );
+
+                    // Find the Scaffold in the Widget tree and use it to show a SnackBar!
+                    Scaffold.of(context).showSnackBar(snackBar);
+
+                  },
+                )
+              ],
+            ),
+
+          ],
+        ),
+      ),
+
     ],
   );
 }
