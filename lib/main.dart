@@ -9,6 +9,7 @@ import 'History.dart';
 import 'DrawerCreator.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'LoginPage.dart';
+import 'Request.dart';
 
 
 const double RADIUS = 250;
@@ -385,6 +386,8 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   }
 
   void newDay() {
+    Request.getUserHomepage('5c922af211d76f46182883f2');
+
     setState(() {
       testUser.addHistoryEntry(new History(today, testUser.getSteps(), testUser.getPersonalGoal()));
       testUser.addHistoryAsCardWidget(new History(today, testUser.getSteps(), testUser.getPersonalGoal()));
