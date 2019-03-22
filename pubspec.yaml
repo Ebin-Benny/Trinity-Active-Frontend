@@ -20,6 +20,7 @@ dependencies:
   flutter_facebook_login: ^1.1.1
   http: ^0.12.0+1
   clipboard_manager: ^0.0.1
+  random_string: ^0.0.2
   flutter:
     sdk: flutter
 

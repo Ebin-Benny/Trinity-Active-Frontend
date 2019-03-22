@@ -1,13 +1,14 @@
 
 import 'LeagueMember.dart';
+import 'User.dart';
 
 class League {
+  String leagueID;
   String name;
   int goal;
-  List<LeagueMember> members;
+  List<LeagueMember> members = new List();
 
-  League(List<LeagueMember> members, int goal, String name) {
-    this.members = members;
+  League(int goal, String name) {
     this.name = name;
     this.goal = goal;
   }
