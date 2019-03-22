@@ -1,6 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'main.dart';
+import 'User.dart';
+import 'package:flutter_facebook_login/flutter_facebook_login.dart';
+import 'package:http/http.dart' as http;
+
 
 class LoginPage extends StatefulWidget {
   @override
@@ -10,6 +16,51 @@ class LoginPage extends StatefulWidget {
 
 
 class LoginPageState extends State<LoginPage> {
+
+  SamplePageState samplePageState = new SamplePageState();
+  bool isLoggedIn = false;
+  var profileData;
+  User loggedInUser;
+
+  void initiateFacebookLogin() async {
+    var facebookLogin = FacebookLogin();
+    var facebookLoginResult =
+    await facebookLogin.logInWithReadPermissions(['email']);
+    switch (facebookLoginResult.status) {
+      case FacebookLoginStatus.error:
+        print("Error");
+        onLoginStatusChanged(false);
+        break;
+      case FacebookLoginStatus.cancelledByUser:
+        print("CancelledByUser");
+        onLoginStatusChanged(false);
+        break;
+      case FacebookLoginStatus.loggedIn:
+        print("LoggedIn");
+        var graphResponse = await http.get(
+            'https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name,email&access_token=${facebookLoginResult
+                .accessToken.token}');
+
+        var profile = json.decode(graphResponse.body);
+
+        onLoginStatusChanged(true, profileData: profile);
+        this.loggedInUser = new User(profileData['id'].toString(), profileData['name'].toString(), 0, 10000, 1, 0, 1);
+        samplePageState.setUser(loggedInUser);
+        print(loggedInUser.name);
+        Navigator.push(context, MaterialPageRoute(builder: (context) => SamplePage()));
+        break;
+    }
+  }
+
+
+  void onLoginStatusChanged(bool isLoggedIn, {profileData}) {
+    setState(() {
+      this.isLoggedIn = isLoggedIn;
+      this.profileData = profileData;
+    });
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,10 +87,9 @@ class LoginPageState extends State<LoginPage> {
             ),
             new Padding(padding: EdgeInsets.symmetric(vertical: 20)),
             new SignInButton(
-                Buttons.GoogleDark,
+                Buttons.Facebook,
                 onPressed: () {
-                  setLogInState(true);
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => SamplePage()));
+                  initiateFacebookLogin();
 //                  Navigator.pop(context);
                 }
             ),
@@ -49,5 +99,6 @@ class LoginPageState extends State<LoginPage> {
       ),
     );
   }
+
 
 }

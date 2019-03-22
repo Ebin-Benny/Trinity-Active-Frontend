@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:pedometer/pedometer.dart';
 import 'dart:async';
@@ -10,6 +11,9 @@ import 'DrawerCreator.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'LoginPage.dart';
 import 'Request.dart';
+import 'package:clipboard_manager/clipboard_manager.dart';
+import 'LeagueMember.dart';
+import 'package:random_string/random_string.dart';
 
 
 const double RADIUS = 250;
@@ -43,6 +47,10 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   Animation _animation;
 
   final textController = TextEditingController();
+  final setLeagueNameController = TextEditingController();
+  final setLeagueGoalController = TextEditingController();
+  final setLeagueDurationController = TextEditingController();
+  bool showErrorMessage = false;
 
   @override
   void initState() {
@@ -61,6 +69,9 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   void dispose() {
     _controller.dispose();
     textController.dispose();
+    setLeagueDurationController.dispose();
+    setLeagueGoalController.dispose();
+    setLeagueNameController.dispose();
     super.dispose();
   }
   //-----------------------------------------------
@@ -90,7 +101,8 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   List<History> history = new List();
   List<League> leaguesList = new List();
   //DateTime today = new DateTime(2019, 2, 21);
-  static User testUser = new User("17330000", "Owen Johnston", 0, 10000, 1, 0, 1);
+//  static User testUser = new User("17330000", "Owen Johnston", 0, 10000, 1, 0, 1);
+  static User testUser = new User("0", "not logged in", 0, 0, 0, 0, 0);
   List<InkWell> leaguesAsWidgets = new List(testUser.leagues.length);
 
 
@@ -143,7 +155,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
     _screens[1] = home;
     _screens[0] = historyScreen;
     _screens[2] = leagues;
-    _screens[4] = addLeaguePage();
+    _screens[4] = addLeaguePage(context, setLeagueNameController, setLeagueGoalController, setLeagueDurationController, testUser);
     DrawerCreator drawerCreator = new DrawerCreator(testUser, context);
     return Scaffold(
       drawer: drawerCreator.drawer,
@@ -378,6 +390,12 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
     });
   }
 
+  void setUser(User user) {
+    testUser = user;
+    print(testUser.name);
+    print("^^name^^");
+  }
+
   void setGoal(int newGoal) {
     setState(() {
       testUser.setPersonalGoal(newGoal);
@@ -448,6 +466,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   }
 
   InkWell leagueSummary(League league) {
+    LeagueMember currentLeagueMember = league.getMember(testUser.getUserID());
     return new InkWell(
       splashColor: Colors.blue.withOpacity(0.2),
       onTap: () {
@@ -485,7 +504,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     new Text(
-                      testUser.getSteps().toString(),
+                      testUser.steps.toString(),
                       style: TextStyle(fontSize: 30, color: isCompleted ? Colors.lightGreenAccent[700] : Colors.blue, fontWeight: FontWeight.bold,),
                     ),
                   ],
@@ -501,7 +520,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                       height: 27,
                       child: Center(
                         child: Text(
-                          "x2",
+                          ("x2"),
                           textAlign: TextAlign.center,
                           style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold,),
                         ),
@@ -518,6 +537,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   }
 
   Widget leaguesPage(List<League> leagues) {
+    this.leaguesAsWidgets = new List(leagues.length);
     for(int i = 0; i < leagues.length; i++) {
       this.leaguesAsWidgets[i] = leagueSummary(leagues[i]);
     }
@@ -537,7 +557,357 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
       ),
       floatingActionButtonLocation: showLeagueOptions ? FloatingActionButtonLocation.centerDocked : null,
     );
+  }
+  Widget addLeaguePage(BuildContext context,TextEditingController nameController, TextEditingController stepController, TextEditingController durationController, User currentUser) {
+    League newLeague;
+    return Scaffold(
+      body: Stack(
+        children: <Widget>[
+          ListView(
+            children: <Widget>[
+              Column(
+                children: <Widget>[
+                  Container(
+                    height: 160,
+                    decoration: new BoxDecoration(
+                      gradient: new LinearGradient(
+                          begin: FractionalOffset.bottomCenter,
+                          end: FractionalOffset.topCenter,
+                          colors: [
+                            Colors.lightBlueAccent,
+                            Colors.blueAccent,
+                          ]
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        new Text(
+                          "NEW LEAGUE",
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: Colors.white),
+                        ),
+                        new Padding(padding: EdgeInsets.symmetric(vertical: 10)),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Icon(
+                              Icons.group,
+                              color: Colors.white,
+                              size: 40,
+                            ),
+                            Container(
+                              width: 200,
+                              child: new TextField(
+                                controller: nameController,
+                                textAlign: TextAlign.center,
+                                decoration: InputDecoration(
+                                  filled: true,
+                                  fillColor: Colors.black.withOpacity(0.05),
+                                  hintText: "League Name",
+                                ),
+                              ),
+                            ),
 
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  new Padding(padding: EdgeInsets.symmetric(vertical: 15)),
+                  new Text(
+                    "SET DAILY STEP GOAL",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.grey),
+                  ),
+                  new Padding(padding: EdgeInsets.symmetric(vertical: 5)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Image.asset(
+                        "images/steps_image.png",
+                        height: 35,
+                        width: 30,
+                        color: Colors.blue,
+                      ),
+                      Container(
+                        width: 200,
+                        child: new TextField(
+                          controller: stepController,
+                          keyboardType: TextInputType.number,
+                          textAlign: TextAlign.center,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.black.withOpacity(0.05),
+                          ),
+                        ),
+                      ),
+                      new Padding(padding: EdgeInsets.symmetric(horizontal: 15)),
+                    ],
+                  ),
+                  new Padding(padding: EdgeInsets.symmetric(vertical: 20)),
+                  new Text(
+                    "SET DURATION OF LEAGUE",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.grey),
+                  ),
+                  new Padding(padding: EdgeInsets.symmetric(vertical: 5)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Icon(
+                        Icons.timer,
+                        size: 35,
+                        color: Colors.blue,
+                      ),
+                      Container(
+                        width: 200,
+                        child: new TextField(
+                          controller: durationController,
+                          keyboardType: TextInputType.number,
+                          textAlign: TextAlign.center,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.black.withOpacity(0.05),
+                          ),
+                        ),
+                      ),
+                      new Padding(padding: EdgeInsets.symmetric(horizontal: 15)),
+                    ],
+                  ),
+                  new Padding(padding: EdgeInsets.symmetric(vertical: 15)),
+//              Container(
+//                height: 70,
+//                width: 260,
+//                decoration: new BoxDecoration(
+//                    gradient: new LinearGradient(
+//                        begin: FractionalOffset.bottomCenter,
+//                        end: FractionalOffset.topCenter,
+//                        colors: [
+//                          Colors.lightBlueAccent,
+//                          Colors.blueAccent,
+//                        ]
+//                    ),
+//                    border: new Border.all(
+//                      color: Colors.blue,
+//                      width: 0,
+//                      style: BorderStyle.solid,
+//                    ),
+//                    borderRadius: new BorderRadius.all(
+//                      new Radius.circular(15),
+//                    ),
+//                    boxShadow: [
+//                      new BoxShadow(
+//                          color: Colors.grey.withOpacity(0.5),
+//                          blurRadius: 5,
+//                          offset: new Offset(3,3)
+//                      ),
+//                    ]
+//                ),
+//                child: Column(
+//                  mainAxisAlignment: MainAxisAlignment.center,
+//                  children: <Widget>[
+//                    Row(
+//                      mainAxisAlignment: MainAxisAlignment.center,
+//                      children: <Widget>[
+//                        Container(
+//                          width: 180,
+//                          height: 50,
+//                          decoration: new BoxDecoration(
+//                            color: Colors.white,
+//                            border: new Border.all(
+//                              color: Colors.white,
+//                              width: 5,
+//                              style: BorderStyle.solid,
+//                            ),
+//                            borderRadius: new BorderRadius.all(
+//                              new Radius.circular(5),
+//                            ),
+//                          ),
+//                          child: Column(
+//                            mainAxisAlignment: MainAxisAlignment.center,
+//                            children: <Widget>[
+//                              new Text(
+//                                newLeague != null ? newLeague.leagueID : "",
+//                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25, color: Colors.black.withOpacity(0.6)),
+//                                textAlign: TextAlign.center,
+//                              ),
+//                            ],
+//                          ),
+//                        ),
+//                        new Padding(padding: EdgeInsets.symmetric(horizontal: 5)),
+//                        IconButton(
+//                          icon: Icon(
+//                            Icons.content_copy,
+//                            color: Colors.white.withOpacity(0.8),
+//                            size: 40,
+//                          ),
+//                          onPressed: () {
+//                            ClipboardData data = new ClipboardData(text: "aJk4Tz");
+//                            Clipboard.setData(data);
+//                          },
+//                        )
+//                      ],
+//                    ),
+//
+//                  ],
+//                ),
+//              ),
+                  new Padding(
+                    padding: EdgeInsets.symmetric(vertical: 5),
+                  ),
+                  new Text(
+                    showErrorMessage ? "Please complete all fields." : "",
+                    style: TextStyle(color: Colors.red),
+                  ),
+                  new RaisedButton(
+                    onPressed: () {
+                      if(stepController.text.isNotEmpty  && durationController.text.isNotEmpty && nameController.text.isNotEmpty) {
+                        newLeague = new League(num.parse(stepController.text), nameController.text);
+                        newLeague.addMember(currentUser.getUserID());
+                        newLeague.leagueID = randomString(6);
+                        currentUser.addLeague(newLeague);
+                        _currentIndex = 2;
+                        stepController.clear();
+                        durationController.clear();
+                        nameController.clear();
+                        showErrorMessage = false;
+                      }
+                      else {
+                        setState(() {
+                          showErrorMessage = true;
+                          print("empty form");
+                          print(showErrorMessage);
+                        });
+                      }
+                    },
+                    child: new Text(
+                      "CREATE LEAGUE",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    color: Colors.blue,
+                  ),
+
+                ],
+              )
+            ],
+          ),
+          Positioned(
+            top: 10,
+            left: 10,
+            child: IconButton(
+              icon: Icon(
+                Icons.arrow_back,
+                color: Colors.white,
+                size: 40,
+              ),
+              onPressed: () {
+                _currentIndex = 2;
+                showErrorMessage = false;
+              },
+            ),
+          )
+        ],
+      )
+    );
+  }
+
+  Widget leaguesFocus(League league, List<Widget> leaderboard, User user) {
+    return (Stack(
+      children: <Widget>[
+        Center(
+          child: ListView(
+              children: <Widget>[
+                new Padding(
+                  padding: EdgeInsets.symmetric(vertical: 5),
+                ),
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.group, color: Colors.grey.withOpacity(0.8),),
+                      new Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 2),
+                      ),
+                      new Text(
+                        league.name,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: Colors.grey.withOpacity(1)),
+                      ),
+                    ]
+                ),
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      leagueIndicator(user, league),
+                    ]
+
+                ),
+                new Padding(padding: EdgeInsets.symmetric(vertical: 5)),
+                Card(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Container(
+                        constraints: BoxConstraints.expand(height: 40),
+                        decoration: new BoxDecoration(
+                          color: Colors.lightBlue[200],
+                          border: new Border.all(
+                            color: Colors.lightBlue[200],
+                            width: 5,
+                            style: BorderStyle.solid,
+                          ),
+                          borderRadius: new BorderRadius.vertical(
+                            top: new Radius.circular(5),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: <Widget>[
+                            Icon(
+                              Icons.stars,
+                              color: Colors.white,
+                            ),
+                            new Padding(padding: EdgeInsets.symmetric(horizontal: 50)),
+                            new Text(
+                              "Leaderboard",
+                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 18),
+                            ),
+                            new Padding(padding: EdgeInsets.symmetric(horizontal: 50)),
+                            Image.asset(
+                              "images/steps_image.png",
+                              height: 25,
+                              width: 20,
+                              color: Colors.white,
+                            ),
+                          ],
+                        ),
+
+                      ),
+                      //Temporarily hardcoded just for visual example and testing ListTile
+                      Column(children: leaderboard,),
+                    ],
+                  ),
+                ),
+              ]),
+        ),
+        Positioned(
+          top: 10,
+          left: 10,
+          child: IconButton(
+            icon: Icon(
+              Icons.arrow_back,
+              color: Colors.grey,
+              size: 40,
+            ),
+            onPressed: () {
+              _currentIndex = 2;
+              showErrorMessage = false;
+            },
+          ),
+        )
+      ],
+    ));
+  }
+
+  void setCurrentIndex(int index) {
+    _currentIndex = index;
   }
 }
 
@@ -749,89 +1119,7 @@ CircularPercentIndicator homeIndicator(User user) {
 
 
 //Made this it's own entire widget so we can control what widgets are displayed(for changing screens)
-Widget leaguesFocus(League league, List<Widget> leaderboard, User user) {
-  return (Center(
-    child: ListView(
-        children: <Widget>[
-          new Padding(
-            padding: EdgeInsets.symmetric(vertical: 5),
-          ),
-          Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.group, color: Colors.grey.withOpacity(0.8),),
-                new Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 2),
-                ),
-                new Text(
-                  league.name,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: Colors.grey.withOpacity(1)),
-                ),
-              ]
-          ),
-          Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.arrow_back_ios,
-                  color: Colors.grey.withOpacity(0.8),),
-                leagueIndicator(user, league),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  color: Colors.grey.withOpacity(0.8),)
-              ]
 
-          ),
-          new Padding(padding: EdgeInsets.symmetric(vertical: 5)),
-          Card(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Container(
-                  constraints: BoxConstraints.expand(height: 40),
-                  decoration: new BoxDecoration(
-                    color: Colors.lightBlue[200],
-                    border: new Border.all(
-                      color: Colors.lightBlue[200],
-                      width: 5,
-                      style: BorderStyle.solid,
-                    ),
-                    borderRadius: new BorderRadius.vertical(
-                      top: new Radius.circular(5),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: <Widget>[
-                      Icon(
-                        Icons.stars,
-                        color: Colors.white,
-                      ),
-                      new Padding(padding: EdgeInsets.symmetric(horizontal: 50)),
-                      new Text(
-                        "Leaderboard",
-                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 18),
-                      ),
-                      new Padding(padding: EdgeInsets.symmetric(horizontal: 50)),
-                      Image.asset(
-                        "images/steps_image.png",
-                        height: 25,
-                        width: 20,
-                        color: Colors.white,
-                      ),
-                    ],
-                  ),
-
-                ),
-                //Temporarily hardcoded just for visual example and testing ListTile
-                Column(children: leaderboard,),
-              ],
-            ),
-          ),
-        ]),
-  ));
-}
 
 Widget historyGraph(User user) {
   List<LinearPercentIndicator> lines = new List(30);
@@ -921,44 +1209,7 @@ LinearPercentIndicator lineInGraph (History history, double pixelToStepsRatio) {
   );
 }
 
-Widget addLeaguePage() {
-  return Column(
-    children: <Widget>[
-      Container(
-        height: 200,
-        decoration: new BoxDecoration(
-            gradient: new LinearGradient(
-                begin: FractionalOffset.bottomCenter,
-                end: FractionalOffset.topCenter,
-                colors: [
-                  Colors.lightBlueAccent,
-                  Colors.blueAccent,
-                ]
-            )
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            new Text(
-                "CREATE LEAGUE",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: Colors.white),
-            ),
-            new Padding(padding: EdgeInsets.symmetric(vertical: 10)),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Icon(
-                  Icons.group,
-                ),
-                
-              ],
-            ),
-          ],
-        ),
-      ),
-    ],
-  );
-}
+
 
 Widget historyPage(User user) {
   return(

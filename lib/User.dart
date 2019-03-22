@@ -13,7 +13,6 @@ class User {
   int level = 0;
   List<League> leagues = new List();
   List<Widget> historyAsCardWidgets = new List();
-  List<int> levelStepRequirements = new List(50);
 
   User(String userID, String name, int steps, int personalGoal, int multiplier, int lifetimeSteps, int level) {
     this.name = name;
@@ -22,7 +21,7 @@ class User {
     this.multiplier = multiplier;
     this.lifetimeSteps = lifetimeSteps;
     this.level = level;
-    leagues.add(new League(null, 20000, "test"));
+    leagues.add(new League(20000, "test"));
   }
 
   void setName(String name) {
@@ -144,5 +143,9 @@ class User {
       }
     }
     return highestStep;
+  }
+
+  void addLeague(League league) {
+    this.leagues.add(league);
   }
 }
