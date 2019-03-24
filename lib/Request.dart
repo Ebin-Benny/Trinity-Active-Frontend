@@ -44,7 +44,22 @@ class Request {
     int level = 1; //didn't find it in json
     var user = new User(userID, name, steps, personalGoal, multiplier, lifetimeSteps, level);
     var historyList = new List<History>();
-    //get history ?
+    var year = new List<dynamic>();
+    year = json['year'];
+    for(var i=0;i<year.length;i++){
+      var y=year[i]['year'];
+      var week = new List<dynamic>();
+      week = year[i]['week'];
+      for(var j=0;j<week.length;j++){
+        var day = new List<dynamic>();
+        day = week[j]['day'];
+        for(var k=0;k<day.length;k++){
+          var md = day[k]['day'].split('-');
+          var date = new DateTime(int.parse(y),int.parse(md[1]),int.parse(md[0]));
+          historyList.add(new History(date,day[k]['steps'], int.parse(day[k]['goal'])));
+        }
+      }
+    }
     user.setStepHistory(historyList);
     return user;
   }
