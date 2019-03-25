@@ -21,7 +21,7 @@ class User {
     this.multiplier = multiplier;
     this.lifetimeSteps = lifetimeSteps;
     this.level = level;
-    leagues.add(new League(20000, "test"));
+    //leagues.add(new League(20000, "test"));
   }
 
   void setName(String name) {

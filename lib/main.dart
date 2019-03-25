@@ -607,7 +607,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                                 ),
                               ),
                             ),
-
+                            new Padding(padding: EdgeInsets.symmetric(horizontal: 15)),
                           ],
                         ),
                       ],
@@ -644,35 +644,35 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                     ],
                   ),
                   new Padding(padding: EdgeInsets.symmetric(vertical: 20)),
-                  new Text(
-                    "SET DURATION OF LEAGUE",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.grey),
-                  ),
-                  new Padding(padding: EdgeInsets.symmetric(vertical: 5)),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Icon(
-                        Icons.timer,
-                        size: 35,
-                        color: Colors.blue,
-                      ),
-                      Container(
-                        width: 200,
-                        child: new TextField(
-                          controller: durationController,
-                          keyboardType: TextInputType.number,
-                          textAlign: TextAlign.center,
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.black.withOpacity(0.05),
-                          ),
-                        ),
-                      ),
-                      new Padding(padding: EdgeInsets.symmetric(horizontal: 15)),
-                    ],
-                  ),
-                  new Padding(padding: EdgeInsets.symmetric(vertical: 15)),
+//                  new Text(
+//                    "SET DURATION OF LEAGUE",
+//                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.grey),
+//                  ),
+//                  new Padding(padding: EdgeInsets.symmetric(vertical: 5)),
+//                  Row(
+//                    mainAxisAlignment: MainAxisAlignment.center,
+//                    children: <Widget>[
+//                      Icon(
+//                        Icons.timer,
+//                        size: 35,
+//                        color: Colors.blue,
+//                      ),
+//                      Container(
+//                        width: 200,
+//                        child: new TextField(
+//                          controller: durationController,
+//                          keyboardType: TextInputType.number,
+//                          textAlign: TextAlign.center,
+//                          decoration: InputDecoration(
+//                            filled: true,
+//                            fillColor: Colors.black.withOpacity(0.05),
+//                          ),
+//                        ),
+//                      ),
+//                      new Padding(padding: EdgeInsets.symmetric(horizontal: 15)),
+//                    ],
+//                  ),
+//                  new Padding(padding: EdgeInsets.symmetric(vertical: 15)),
 //              Container(
 //                height: 70,
 //                width: 260,
@@ -759,10 +759,10 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                   ),
                   new RaisedButton(
                     onPressed: () {
-                      if(stepController.text.isNotEmpty  && durationController.text.isNotEmpty && nameController.text.isNotEmpty) {
+                      if(stepController.text.isNotEmpty && nameController.text.isNotEmpty) {
                         newLeague = new League(num.parse(stepController.text), nameController.text);
-                        newLeague.addMember(currentUser.getUserID());
                         newLeague.leagueID = randomAlpha(6);
+                        newLeague.addMember(new LeagueMember(currentUser.userID, currentUser.name, newLeague.leagueID, 0));
                         print(newLeague.leagueID);
                         currentUser.addLeague(newLeague);
                         _currentIndex = 2;
@@ -881,11 +881,97 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                         ),
 
                       ),
-                      //Temporarily hardcoded just for visual example and testing ListTile
-                      Column(children: leaderboard,),
+                      league.leaderboard != null ? league.leaderboard : new Text(""
+                        "No members to show.",
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.grey.withOpacity(0.6)),
+                      )
                     ],
                   ),
                 ),
+                Column(
+                  children: <Widget>[
+                    new Padding(padding: EdgeInsets.symmetric(vertical: 10)),
+                    new Text("League ID"),
+                    new Padding(padding: EdgeInsets.symmetric(vertical: 5)),
+                    Container(
+                      height: 70,
+                      width: 260,
+                      decoration: new BoxDecoration(
+                          gradient: new LinearGradient(
+                              begin: FractionalOffset.bottomCenter,
+                              end: FractionalOffset.topCenter,
+                              colors: [
+                                Colors.lightBlueAccent,
+                                Colors.blueAccent,
+                              ]
+                          ),
+                          border: new Border.all(
+                            color: Colors.blue,
+                            width: 0,
+                            style: BorderStyle.solid,
+                          ),
+                          borderRadius: new BorderRadius.all(
+                            new Radius.circular(15),
+                          ),
+                          boxShadow: [
+                            new BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                blurRadius: 5,
+                                offset: new Offset(3,3)
+                            ),
+                          ]
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Container(
+                                width: 180,
+                                height: 50,
+                                decoration: new BoxDecoration(
+                                  color: Colors.white,
+                                  border: new Border.all(
+                                    color: Colors.white,
+                                    width: 5,
+                                    style: BorderStyle.solid,
+                                  ),
+                                  borderRadius: new BorderRadius.all(
+                                    new Radius.circular(5),
+                                  ),
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: <Widget>[
+                                    new Text(
+                                      league.leagueID,
+                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25, color: Colors.black.withOpacity(0.6)),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              new Padding(padding: EdgeInsets.symmetric(horizontal: 5)),
+                              IconButton(
+                                icon: Icon(
+                                  Icons.content_copy,
+                                  color: Colors.white.withOpacity(0.8),
+                                  size: 40,
+                                ),
+                                onPressed: () {
+                                  ClipboardData data = new ClipboardData(text: "aJk4Tz");
+                                  Clipboard.setData(data);
+                                },
+                              )
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    new Padding(padding: EdgeInsets.symmetric(vertical: 10)),
+                  ],
+                )
               ]),
         ),
         Positioned(
