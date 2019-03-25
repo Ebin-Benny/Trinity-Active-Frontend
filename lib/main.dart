@@ -759,7 +759,8 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                       if(stepController.text.isNotEmpty  && durationController.text.isNotEmpty && nameController.text.isNotEmpty) {
                         newLeague = new League(num.parse(stepController.text), nameController.text);
                         newLeague.addMember(currentUser.getUserID());
-                        newLeague.leagueID = randomString(6);
+                        newLeague.leagueID = randomAlpha(6);
+                        print(newLeague.leagueID);
                         currentUser.addLeague(newLeague);
                         _currentIndex = 2;
                         stepController.clear();
