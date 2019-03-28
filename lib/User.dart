@@ -21,6 +21,7 @@ class User {
     this.multiplier = multiplier;
     this.lifetimeSteps = lifetimeSteps;
     this.level = level;
+    this.userID = userID;
     //leagues.add(new League(20000, "test"));
   }
 

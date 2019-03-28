@@ -403,8 +403,9 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
     });
   }
 
-  void newDay() {
-    Request.getUserHomepage('5c922af211d76f46182883f2');
+  void newDay() async {
+    var user = new User('5c7c151b7ad15f304ca68000', 'test', 10, 12, 12, 12, 1);
+    User usr = await Request.getUserHomepage(user);
 
     setState(() {
       testUser.addHistoryEntry(new History(today, testUser.getSteps(), testUser.getPersonalGoal()));

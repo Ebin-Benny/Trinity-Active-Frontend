@@ -7,15 +7,17 @@ import 'History.dart';
 
 class Request {
 
-  static Future<User> getUserHomepage(String id) async {
-    var uri = new Uri.http('68.183.45.201:3001','getUserHomepage/'+id);
+  static Future<User> getUserHomepage(User user) async {
+
+    var uri = new Uri.http('68.183.45.201:3001','getUserHomepage/'+user.getUserID());
     //var uri = '68.183.45.201:3001/getUserHomepage/5c922af211d76f46182883f2';
     var response = await http.get(uri);
 
     if(response.statusCode == 200){
       //success : we have a json
 
-      return createUserFromJSon(json.decode(response.body)['data']);
+      updateUserFromJSon(json.decode(response.body),user);
+      return user;
     }
     else{
       throw Exception('failed to get from the server');
@@ -23,10 +25,8 @@ class Request {
   }
   //We can create a method here to convert Json to a class
 
-  static putInfo(){
-    String json = "";
-    //Create/convert class to json
-    http.put(Uri.encodeFull("placeholder"), body: json).then((result) {
+  static postNewUser(){
+    http.post(Uri.encodeFull("68.183.45.201:3001/createNewUser"), body: {}).then((result) {
       //handle response code
       if(result.statusCode != 200){
         throw Exception("fail to put info to the server");
@@ -34,32 +34,15 @@ class Request {
     });
   }
 
-  static User createUserFromJSon(Map<String, dynamic> json){
-    String userID = json['_id'];
-    String name = json['name'];
-    int steps = 666; //didn't find , maybe take from history ?
-    int personalGoal = 666; //didn't find , maybe take from history ?
-    int multiplier = 1; //didn't find it in json
-    int lifetimeSteps = json['totalSteps'];
-    int level = 1; //didn't find it in json
-    var user = new User(userID, name, steps, personalGoal, multiplier, lifetimeSteps, level);
+  static updateUserFromJSon(Map<String, dynamic> json,User user){
     var historyList = new List<History>();
-    var year = new List<dynamic>();
-    year = json['year'];
-    for(var i=0;i<year.length;i++){
-      var y=year[i]['year'];
-      var week = new List<dynamic>();
-      week = year[i]['week'];
-      for(var j=0;j<week.length;j++){
-        var day = new List<dynamic>();
-        day = week[j]['day'];
-        for(var k=0;k<day.length;k++){
-          var md = day[k]['day'].split('-');
-          var date = new DateTime(int.parse(y),int.parse(md[1]),int.parse(md[0]));
-          historyList.add(new History(date,day[k]['steps'], int.parse(day[k]['goal'])));
+    var list = new List<dynamic>();
+    list = json['data'];
+    for(var i=0;i<list.length;i++){
+          var md = list[i]['day'].split('-');
+          var date = new DateTime(list[i]['year'],int.parse(md[1]),int.parse(md[0]));
+          historyList.add(new History(date,list[i]['steps'], list[i]['goal']));
         }
-      }
-    }
     user.setStepHistory(historyList);
     return user;
   }
