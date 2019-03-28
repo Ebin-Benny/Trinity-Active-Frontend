@@ -1122,7 +1122,7 @@ Widget leagueIndicator(User user, League league) {
           height: 40,
           child: Center(
             child: Text(
-              "x2",
+              "x1",
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold,),
             ),
@@ -1300,12 +1300,13 @@ LinearPercentIndicator lineInGraph (History history, double pixelToStepsRatio) {
 
 
 Widget historyPage(User user) {
+  List<Widget> listToShow = user.getHistoryAsCardWidgets().reversed.toList();
   return(
     ListView(
       children: <Widget>[
         historyGraph(user),
         Column(
-            children: user.getHistoryAsCardWidgets().isNotEmpty ? user.getHistoryAsCardWidgets() : <Widget> [new Padding(padding: EdgeInsets.symmetric(vertical: 10)), new Text("No history to show.", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),)]
+            children: listToShow.isNotEmpty ? listToShow : <Widget> [new Padding(padding: EdgeInsets.symmetric(vertical: 10)), new Text("No history to show.", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),)]
         ),
       ],
     )
