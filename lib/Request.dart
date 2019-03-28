@@ -25,13 +25,22 @@ class Request {
   }
   //We can create a method here to convert Json to a class
 
-  static postNewUser(){
-    http.post(Uri.encodeFull("68.183.45.201:3001/createNewUser"), body: {}).then((result) {
+  static postNewUser(User user) async{
+    http.post(Uri.encodeFull("68.183.45.201:3001/createNewUser"), body: {"name": user.getUserID(), "steps": user.getSteps().toString()}).then((result) {
       //handle response code
       if(result.statusCode != 200){
-        throw Exception("fail to put info to the server");
+        throw Exception("fail to post info to the server");
       }
     });
+  }
+
+  static updateUserSteps(User user) async{
+
+    var uri = new Uri.http('68.183.45.201:3001','/updateUser/'+user.getUserID(),{"steps" : user.getSteps().toString()});
+    var result = await http.get(uri);
+    if(result.statusCode != 200){
+      throw Exception("fail to post info to the server");
+    }
   }
 
   static updateUserFromJSon(Map<String, dynamic> json,User user){
