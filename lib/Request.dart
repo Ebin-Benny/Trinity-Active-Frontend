@@ -22,6 +22,20 @@ class Request {
     }
   }
 
+  static Future<bool> userLookup(String userID) async {
+    //Return if the user is or isn't in the database
+    var uri = new Uri.http('68.183.45.201:3001','userLookup/'+userID);
+    var response = await http.get(uri);
+    if(response.statusCode == 200){
+      //no fail
+      return json.decode(response.body)['data']==1;
+
+    }
+    else{
+      throw Exception('failed to lookup an user from the server');
+    }
+  }
+
   static postNewUser(User user) async{
     //Adds an user to the database
 
@@ -32,6 +46,7 @@ class Request {
       }
     });
   }
+
 
   static addUserToLeague(String leagueID,User user) async{
     //Takes an existing leagueID and add the user to the league corresponding
