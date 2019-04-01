@@ -118,9 +118,9 @@ class User {
   }
 
   double percentToNextLevel() {
-    print(lifetimeSteps);
+    //print(lifetimeSteps);
     double percent = (this.lifetimeSteps - getLevelsStepRequirements(this.level)) / (getLevelsStepRequirements(this.level+1) - getLevelsStepRequirements(this.level));
-    print(percent);
+    //print(percent);
     return percent;
 //    return 0.5;
   }
