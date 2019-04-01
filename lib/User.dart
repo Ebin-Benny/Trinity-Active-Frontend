@@ -1,6 +1,7 @@
 import 'History.dart';
 import 'package:flutter/material.dart';
 import 'League.dart';
+import 'package:random_string/random_string.dart';
 
 class User {
   String name = "";
@@ -116,7 +117,9 @@ class User {
   }
 
   double percentToNextLevel() {
+    print(lifetimeSteps);
     double percent = (this.lifetimeSteps - getLevelsStepRequirements(this.level)) / (getLevelsStepRequirements(this.level+1) - getLevelsStepRequirements(this.level));
+    print(percent);
     return percent;
 //    return 0.5;
   }
@@ -147,5 +150,13 @@ class User {
 
   void addLeague(League league) {
     this.leagues.add(league);
+  }
+
+  void hardCodeHistory() {
+    List<History> hardcodedHistory = new List();
+    for(int i = 0; i < 24; i++) {
+      hardcodedHistory.add(new History(new DateTime(2019,3,1+i), int.parse(randomNumeric(4)), 8000));
+    }
+    this.stepHistory = hardcodedHistory;
   }
 }

@@ -11,23 +11,27 @@ class League {
   List<LeagueMember> members = new List();
   Widget leaderboard;
 
+
   League(int goal, String name) {
     this.name = name;
     this.goal = goal;
 
-    //Test
-//    members.add(new LeagueMember("123", "456", 10000));
-//    members.add(new LeagueMember("124", "456", 11000));
-//    members.add(new LeagueMember("125", "456", 9000));
-//    members.add(new LeagueMember("125", "456", 58000));
-//    members.add(new LeagueMember("123", "456", 1000));
-//    members.add(new LeagueMember("124", "456", 16000));
-//    members.add(new LeagueMember("125", "456", 4000));
-//    members.add(new LeagueMember("125", "456", 20000));
-
     if(this.members.length >= 0) {
       this.leaderboard = membersToLeaderboard();
     }
+  }
+
+  //Test contructor TODO: REMOVE
+  League.asTestLeague (int goal, String name, String leagueID) {
+    this.goal = goal;
+    this.name = name;
+    this.leagueID = leagueID;
+    members.add(new LeagueMember("125", "Ebin Benny", leagueID, 9864));
+    members.add(new LeagueMember("125", "Caolan Wall", leagueID, 58056));
+    members.add(new LeagueMember("123", "John Zhang", leagueID, 1345));
+    members.add(new LeagueMember("124", "David Scollard", leagueID, 16210));
+    members.add(new LeagueMember("125", "Baptiste Frere", leagueID, 21690));
+    this.leaderboard = membersToLeaderboard();
   }
 
   LeagueMember getMember(String userID) {

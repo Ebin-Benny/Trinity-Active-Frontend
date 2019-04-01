@@ -33,4 +33,5 @@ class LeagueMember {
     this.name = name;
   }
 
+
 }

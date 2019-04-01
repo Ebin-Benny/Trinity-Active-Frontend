@@ -50,6 +50,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   final setLeagueNameController = TextEditingController();
   final setLeagueGoalController = TextEditingController();
   final setLeagueDurationController = TextEditingController();
+  final addLeagueController = TextEditingController();
   bool showErrorMessage = false;
 
   @override
@@ -102,7 +103,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   List<League> leaguesList = new List();
   //DateTime today = new DateTime(2019, 2, 21);
 //  static User testUser = new User("17330000", "Owen Johnston", 0, 10000, 1, 0, 1);
-  static User testUser = new User("0", "not logged in", 0, 0, 0, 0, 0);
+  static User testUser = new User("0", "not logged in", 0, 0, 0, 1234, 0);
   List<InkWell> leaguesAsWidgets = new List(testUser.leagues.length);
 
 
@@ -256,7 +257,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                   Container(
                     width: 200,
                     child: new TextField(
-                      controller: textController,
+                      controller: addLeagueController,
                       textAlign: TextAlign.center,
                       decoration: InputDecoration(
                         filled: true,
@@ -289,6 +290,10 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                       FloatingActionButton(
                         child: Icon(Icons.check),
                         onPressed: () {
+//                          League hardcodedLeague = new League.asTestLeague(15000, "Trinity", "dEOwJO");
+//                          hardcodedLeague.addMember(new LeagueMember(testUser.userID, testUser.name, "dEOwJo", 368));
+//                          testUser.addLeague(hardcodedLeague);
+//                          hardcodedLeague.updateLeaderboard();
                           toggleLeagueOptions();
                         },
                       ),
@@ -891,8 +896,10 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                 Column(
                   children: <Widget>[
                     new Padding(padding: EdgeInsets.symmetric(vertical: 10)),
-                    new Text("League ID"),
-                    new Padding(padding: EdgeInsets.symmetric(vertical: 5)),
+                    new Text(
+                      "League ID",
+                      style: TextStyle(color: Colors.grey.withOpacity(0.7), fontWeight: FontWeight.bold),
+                    ),
                     Container(
                       height: 70,
                       width: 260,
@@ -1121,7 +1128,7 @@ Widget leagueIndicator(User user, League league) {
           height: 40,
           child: Center(
             child: Text(
-              "x1",
+              "x2",
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold,),
             ),
