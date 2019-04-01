@@ -8,10 +8,9 @@ class User {
   String userID = "";
   int steps = 0;
   int lifetimeSteps = 0;
-  int multiplier = 1;
   List<History> stepHistory;
-  int personalGoal = 0;
-  int level = 0;
+  int personalGoal = 10000;
+  int level = 1;
   List<League> leagues = new List();
   List<Widget> historyAsCardWidgets = new List();
 
@@ -19,11 +18,15 @@ class User {
     this.name = name;
     this.steps = steps;
     this.personalGoal = personalGoal;
-    this.multiplier = multiplier;
     this.lifetimeSteps = lifetimeSteps;
     this.level = level;
     this.userID = userID;
     //leagues.add(new League(20000, "test"));
+  }
+
+  User.newUser(String userID, String name) {
+    this.userID = userID;
+    this.name = name;
   }
 
   void setName(String name) {
@@ -36,10 +39,6 @@ class User {
 
   void setLifetimeSteps(int steps) {
     this.lifetimeSteps = steps;
-  }
-
-  void setMultiplier(int multiplier) {
-    this.multiplier = multiplier;
   }
 
   void setPersonalGoal(int personalGoal) {
@@ -60,10 +59,6 @@ class User {
 
   int getLifetimeSteps() {
     return this.lifetimeSteps;
-  }
-
-  int getMultiplier() {
-    return this.multiplier;
   }
 
   int getPersonalGoal() {
@@ -118,9 +113,7 @@ class User {
   }
 
   double percentToNextLevel() {
-    print(lifetimeSteps);
     double percent = (this.lifetimeSteps - getLevelsStepRequirements(this.level)) / (getLevelsStepRequirements(this.level+1) - getLevelsStepRequirements(this.level));
-    print(percent);
     return percent;
 //    return 0.5;
   }

@@ -75,20 +75,8 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
     setLeagueNameController.dispose();
     super.dispose();
   }
-  //-----------------------------------------------
-  //Animation
-
 
   StreamSubscription<int> _subscription;
-
-//  _openPage(Widget page) {
-//    Navigator.push(
-//      context,
-//      new MaterialPageRoute(
-//        builder: (BuildContext context) => page,
-//      ),
-//    );
-//  }
 
 
   String currentLeagueName = "SWENG 37";
@@ -101,8 +89,6 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   DateTime today = new DateTime.now();
   List<History> history = new List();
   List<League> leaguesList = new List();
-  //DateTime today = new DateTime(2019, 2, 21);
-//  static User testUser = new User("17330000", "Owen Johnston", 0, 10000, 1, 0, 1);
   static User testUser = new User("0", "not logged in", 0, 0, 0, 1234, 0);
   List<InkWell> leaguesAsWidgets = new List(testUser.leagues.length);
 
@@ -565,6 +551,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
       floatingActionButtonLocation: showLeagueOptions ? FloatingActionButtonLocation.centerDocked : null,
     );
   }
+
   Widget addLeaguePage(BuildContext context,TextEditingController nameController, TextEditingController stepController, TextEditingController durationController, User currentUser) {
     League newLeague;
     return Scaffold(
@@ -1145,7 +1132,6 @@ Widget leagueIndicator(User user, League league) {
 }
 
 
-
 CircularPercentIndicator homeIndicator(User user) {
   return new CircularPercentIndicator(
       startAngle: 180,
@@ -1304,7 +1290,6 @@ LinearPercentIndicator lineInGraph (History history, double pixelToStepsRatio) {
     )
   );
 }
-
 
 
 Widget historyPage(User user) {

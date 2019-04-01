@@ -6,6 +6,8 @@ import 'main.dart';
 import 'User.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:http/http.dart' as http;
+import 'Request.dart' as request;
+import 'dart:async';
 
 
 class LoginPage extends StatefulWidget {
@@ -44,14 +46,22 @@ class LoginPageState extends State<LoginPage> {
         var profile = json.decode(graphResponse.body);
 
         onLoginStatusChanged(true, profileData: profile);
-        this.loggedInUser = new User(profileData['id'].toString(), profileData['name'].toString(), 0, 10000, 1, 0, 1);
+        //TODO: Add request call here
+        bool userExists = false;
+        if(userExists) {
+          this.loggedInUser = new User.newUser(profileData['id'].toString(), profileData['name'].toString());
+          this.loggedInUser = await request.Request.getUserHomepage(this.loggedInUser);
+        }
+        else {
+          this.loggedInUser = new User.newUser(profileData['id'].toString(), profileData['name'].toString());
+          request.Request.postNewUser(this.loggedInUser);
+        }
         samplePageState.setUser(loggedInUser);
         print(loggedInUser.name);
         Navigator.push(context, MaterialPageRoute(builder: (context) => SamplePage()));
         break;
     }
   }
-
 
   void onLoginStatusChanged(bool isLoggedIn, {profileData}) {
     setState(() {

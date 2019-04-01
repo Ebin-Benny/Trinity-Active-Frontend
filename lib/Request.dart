@@ -22,7 +22,6 @@ class Request {
     }
   }
 
-
   static postNewUser(User user) async{
     //Adds an user to the database
 
@@ -33,7 +32,6 @@ class Request {
       }
     });
   }
-
 
   static addUserToLeague(String leagueID,User user) async{
     //Takes an existing leagueID and add the user to the league corresponding
