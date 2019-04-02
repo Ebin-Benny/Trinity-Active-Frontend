@@ -27,8 +27,13 @@ class Request {
     var uri = new Uri.http('68.183.45.201:3001','userLookup/'+userID);
     var response = await http.get(uri);
     if(response.statusCode == 200){
+      bool result = json.decode(response.body)['data']==1;
+      if(result) {
+        print("User returned!");
+      }
       //no fail
-      return json.decode(response.body)['data']==1;
+      return result;
+
 
     }
     else{
@@ -39,10 +44,13 @@ class Request {
   static postNewUser(User user) async{
     //Adds an user to the database
 
-    http.post(Uri.encodeFull("http://68.183.45.201:3001/createNewUser"), body: {"name": user.getUserID(), "steps": user.getSteps().toString()}).then((result) {
-      //handle response code
+    http.post(Uri.encodeFull("http://68.183.45.201:3001/createNewUser/"+user.getUserID()+"?name="+user.getName()+"&steps="+user.getSteps().toString())).then((result) {
+        //handle response code
       if(result.statusCode != 200){
         throw Exception("fail to post info to the server");
+      }
+      else {
+        print("Success");
       }
     });
   }
