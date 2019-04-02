@@ -74,16 +74,23 @@ class User {
   }
 
   List<History> getStepHistory() {
-    return this.stepHistory;
+    return this.stepHistory.reversed.toList();
   }
 
   void addHistoryEntry(History history) {
-    this.stepHistory.add(history);
+    List<History> temp = new List();
+    temp.add(history);
+    for(int i = 0; i < this.stepHistory.length; i++) {
+      temp.add(this.stepHistory[i]);
+    }
+    this.stepHistory = temp;
+
   }
 
   void historyToCardWidgets() {
     for(int i = 0; i < this.stepHistory.length; i++) {
       this.historyAsCardWidgets.add(this.stepHistory[i].toWidget());
+      print(this.historyAsCardWidgets[i]);
     }
 
   }
@@ -125,8 +132,8 @@ class User {
   List<History> historyLast30Days() {
     List<History> returnList = new List(30);
     for(int i = 0; i < 30; i++) {
-      if((this.stepHistory.length-1-i) >= 0 && this.stepHistory[this.stepHistory.length-1-i] != null) {
-        returnList[returnList.length-1-i] = this.stepHistory[this.stepHistory.length-1-i];
+      if((this.getStepHistory().length-1-i) >= 0 && this.getStepHistory()[this.getStepHistory().length-1-i] != null) {
+        returnList[returnList.length-1-i] = this.getStepHistory()[this.getStepHistory().length-1-i];
       }
     }
     return returnList;
@@ -152,5 +159,13 @@ class User {
       hardcodedHistory.add(new History(new DateTime(2019,3,1+i), int.parse(randomNumeric(4)), 8000));
     }
     this.stepHistory = hardcodedHistory;
+  }
+
+  void updateCardHistory() {
+    List<Widget> temp = new List();
+    for(int i = 0; i < this.stepHistory.length; i++) {
+      temp.add(this.stepHistory[i].toWidget());
+    }
+    this.historyAsCardWidgets = temp;
   }
 }

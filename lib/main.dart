@@ -14,6 +14,10 @@ import 'Request.dart';
 import 'package:clipboard_manager/clipboard_manager.dart';
 import 'LeagueMember.dart';
 import 'package:random_string/random_string.dart';
+import 'StepBucket.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+
 
 
 const double RADIUS = 250;
@@ -80,17 +84,19 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
 
 
   String currentLeagueName = "SWENG 37";
-  int steps = 0;
+  static int steps = 0;
   int totalSteps = 0;
   int goal = 10000;
   int level = 1;
   List<Widget> _screens = new List(5);
   List<Widget> leaderboard =  new List(7);
-  DateTime today = new DateTime.now();
+  static DateTime today = new DateTime.now();
   List<History> history = new List();
   List<League> leaguesList = new List();
   static User testUser = new User("0", "not logged in", 0, 0, 0, 1234, 0);
   List<InkWell> leaguesAsWidgets = new List(testUser.leagues.length);
+  List<StepBucket> stepBuckets = new List();
+  StepBucket currentBucket = new StepBucket(steps, today.day);
 
 
   @override
@@ -135,8 +141,10 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
       )
     ];
     setUpPedometer();
-    testUser.setStepHistory(history);
-    Widget home = homePage(testUser, today);
+    if(testUser.getStepHistory().isEmpty) {
+      testUser.setStepHistory(history);
+    }
+    Widget home = homePage(testUser, today, currentBucket);
     Widget historyScreen = historyPage(testUser);
     Widget leagues = leaguesPage(testUser.leagues);
     _screens[1] = home;
@@ -375,12 +383,6 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
     );
   }
 
-  void setStep() {
-    setState(() {
-      testUser.setSteps(testUser.getSteps() + 1);
-    });
-  }
-
   void setUser(User user) {
     testUser = user;
     print(testUser.name);
@@ -390,25 +392,27 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   void setGoal(int newGoal) {
     setState(() {
       testUser.setPersonalGoal(newGoal);
-      checkCompletion(testUser.getSteps(), testUser.getPersonalGoal());
+      checkCompletion(currentBucket.getSteps(), testUser.getPersonalGoal());
     });
   }
 
   void newDay() async {
-    var user = new User('5c7c151b7ad15f304ca68000', 'test', 10, 12, 12, 12, 1);
-    //User usr = await Request.getUserHomepage(user);
-    //Request.postNewLeague("testLeague",user);
-    bool exist = await Request.userLookup('50');
-
     setState(() {
-      testUser.addHistoryEntry(new History(today, testUser.getSteps(), testUser.getPersonalGoal()));
-      testUser.addHistoryAsCardWidget(new History(today, testUser.getSteps(), testUser.getPersonalGoal()));
+      testUser.setLifetimeSteps(testUser.getLifetimeSteps() + currentBucket.getSteps());
+      testUser.updateLevel();
+      testUser.addHistoryEntry(new History(today, currentBucket.getSteps(), testUser.getPersonalGoal()));
+      testUser.addHistoryAsCardWidget(new History(today, currentBucket.getSteps(), testUser.getPersonalGoal()));
+      StepBucket newBucket = new StepBucket(0, currentBucket.day+1);
+      newBucket.stepOffset = testUser.getSteps();
+      stepBuckets.add(currentBucket);
+      currentBucket = newBucket;
       print(testUser.getStepHistory().length);
+      checkCompletion(currentBucket.getSteps(), testUser.getPersonalGoal());
       for(int i = 0; i < history.length; i++) {
         print(testUser.getStepHistory()[i].steps.toString() + "  index:" + i.toString());
       }
-      testUser.setLifetimeSteps(testUser.getLifetimeSteps() + testUser.getSteps());
-      testUser.updateLevel();
+
+      testUser.updateCardHistory();
       isCompleted = false;
       //totalSteps = 0;
     });
@@ -425,14 +429,22 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
     setState(() {
       // TODO: better implementation of the date changing
       DateTime current = new DateTime.now();
+      int stepOffset;
       if(current.day != today.day) {
         today = current;
         newDay();
       }
-      testUser.setSteps(stepCountValue - testUser.getLifetimeSteps());
-      if(testUser.getSteps() >= testUser.getPersonalGoal()) {
-        setCompletion();
+      testUser.setSteps(stepCountValue /*- testUser.getLifetimeSteps()*/);
+      steps = stepCountValue;
+
+      if(testUser.getSteps() < currentBucket.getSteps()) {
+        currentBucket.updateSteps(currentBucket.getSteps() + testUser.getSteps());
       }
+      else {
+        currentBucket.updateSteps(testUser.getSteps());
+      }
+      print(currentBucket.toString());
+      checkCompletion(currentBucket.getSteps(), testUser.getPersonalGoal());
     });
   }
   void _onDone() => print("Finished pedometer tracking");
@@ -477,9 +489,9 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                 radius: 170,
                 startAngle: 180,
                 lineWidth: 12,
-                progressColor: isCompleted ? Colors.lightGreenAccent[400] : Colors.blue,
+                progressColor: (currentBucket.getSteps() >= league.goal) ? Colors.lightGreenAccent[400] : Colors.blue,
                 backgroundColor: Colors.grey.withOpacity(0.2),
-                percent: testUser.getSteps() >= league.goal ? 1 : testUser.getSteps()/league.goal,
+                percent: currentBucket.getSteps() >= league.goal ? 1 : currentBucket.getSteps()/league.goal,
                 circularStrokeCap: CircularStrokeCap.round,
                 header: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -498,8 +510,8 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     new Text(
-                      testUser.steps.toString(),
-                      style: TextStyle(fontSize: 30, color: isCompleted ? Colors.lightGreenAccent[700] : Colors.blue, fontWeight: FontWeight.bold,),
+                      currentBucket.getSteps().toString(),
+                      style: TextStyle(fontSize: 30, color:(currentBucket.getSteps() >= league.goal) ? Colors.lightGreenAccent[700] : Colors.blue, fontWeight: FontWeight.bold,),
                     ),
                   ],
                 ),
@@ -509,7 +521,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                   children: <Widget>[
                     new Padding(padding: EdgeInsets.symmetric(vertical: 90)),
                     Container(
-                      color: isCompleted ? Colors.lightGreenAccent[700] : Colors.blue[700],
+                      color: (currentBucket.getSteps() >= league.goal) ? Colors.lightGreenAccent[700] : Colors.blue[700],
                       width: 40,
                       height: 27,
                       child: Center(
@@ -831,7 +843,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                 Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      leagueIndicator(user, league),
+                      leagueIndicator(user, league, currentBucket),
                     ]
 
                 ),
@@ -1041,7 +1053,7 @@ CircularPercentIndicator levelIndicator (User user) {
 }
 
 //TODO : Figure out how we are going to store the steps and goal values
-Widget leagueIndicator(User user, League league) {
+Widget leagueIndicator(User user, League league, StepBucket currentBucket) {
   int score = user.getSteps() * 2;
 
   return new Stack(
@@ -1051,7 +1063,7 @@ Widget leagueIndicator(User user, League league) {
         radius: RADIUS,
         lineWidth: 15,
         animation: true,
-        percent: user.getSteps() < league.goal ? user.getSteps() / league.goal : 1,
+        percent: currentBucket.getSteps() < league.goal ? currentBucket.getSteps() / league.goal : 1,
         center: Column(
           children: <Widget>[
             new Padding(
@@ -1063,15 +1075,15 @@ Widget leagueIndicator(User user, League league) {
             ),
             new Text(
               score.toString(),
-              style: TextStyle(fontSize: 50, color: isCompleted ? Colors.lightGreenAccent[700] : Colors.blue, fontWeight: FontWeight.bold,),
+              style: TextStyle(fontSize: 50, color: (currentBucket.getSteps() >= league.goal) ? Colors.lightGreenAccent[700] : Colors.blue, fontWeight: FontWeight.bold,),
             ),
             new Text(
               "STEPS",
               style: TextStyle(fontSize: 18, color: Colors.grey.withOpacity(0.5), fontWeight: FontWeight.bold,),
             ),
             new Text(
-              user.getSteps().toString(),
-              style: TextStyle(fontSize: 24, color: isCompleted ? Colors.lightGreenAccent[700] : Colors.blue, fontWeight: FontWeight.bold,),
+              currentBucket.getSteps().toString(),
+              style: TextStyle(fontSize: 24, color: (currentBucket.getSteps() >= league.goal) ? Colors.lightGreenAccent[700] : Colors.blue, fontWeight: FontWeight.bold,),
             ),
           ],
         ),
@@ -1106,14 +1118,14 @@ Widget leagueIndicator(User user, League league) {
           ],
         ),
         circularStrokeCap: CircularStrokeCap.round,
-        progressColor: isCompleted ? Colors.lightGreenAccent[400] : Colors.blue,
+        progressColor: (currentBucket.getSteps() >= league.goal) ? Colors.lightGreenAccent[400] : Colors.blue,
         backgroundColor: Colors.grey.withOpacity(0.2),
       ),
       Positioned(
         top: RADIUS-22,
         left: RADIUS/2 - 30,
         child: Container(
-          color: isCompleted ? Colors.lightGreenAccent[700] : Colors.blue[700],
+          color: (currentBucket.getSteps() >= league.goal) ? Colors.lightGreenAccent[700] : Colors.blue[700],
           width: 60,
           height: 40,
           child: Center(
@@ -1133,13 +1145,13 @@ Widget leagueIndicator(User user, League league) {
 }
 
 
-CircularPercentIndicator homeIndicator(User user) {
+CircularPercentIndicator homeIndicator(User user, StepBucket currentBucket) {
   return new CircularPercentIndicator(
       startAngle: 180,
       radius: RADIUS,
       lineWidth: 15,
       animation: true,
-      percent: user.getSteps() < user.getPersonalGoal() ? user.getSteps() / user.getPersonalGoal() : 1,
+      percent: currentBucket.getSteps() < user.getPersonalGoal() ? currentBucket.getSteps() / user.getPersonalGoal() : 1,
       center: Column(
         children: <Widget>[
           new Padding(
@@ -1150,7 +1162,7 @@ CircularPercentIndicator homeIndicator(User user) {
             style: TextStyle(fontSize: 18, color: Colors.grey.withOpacity(0.5), fontWeight: FontWeight.bold,),
           ),
           new Text(
-            user.getSteps().toString(),
+            currentBucket.getSteps().toString(),
             style: TextStyle(fontSize: 50, color: isCompleted ? Colors.lightGreenAccent[700] : Colors.blue, fontWeight: FontWeight.bold,),
           ),
           Image.asset(
@@ -1294,20 +1306,19 @@ LinearPercentIndicator lineInGraph (History history, double pixelToStepsRatio) {
 
 
 Widget historyPage(User user) {
-  List<Widget> listToShow = user.getHistoryAsCardWidgets().reversed.toList();
   return(
     ListView(
       children: <Widget>[
         historyGraph(user),
         Column(
-            children: listToShow.isNotEmpty ? listToShow : <Widget> [new Padding(padding: EdgeInsets.symmetric(vertical: 10)), new Text("No history to show.", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),)]
+            children: user.getHistoryAsCardWidgets().isNotEmpty ? user.getHistoryAsCardWidgets() : <Widget> [new Padding(padding: EdgeInsets.symmetric(vertical: 10)), new Text("No history to show.", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),)]
         ),
       ],
     )
   );
 }
 
-Widget homePage(User user, DateTime today) {
+Widget homePage(User user, DateTime today, StepBucket currentBucket) {
   return Center(
     child: ListView(
       children: <Widget>[
@@ -1331,7 +1342,7 @@ Widget homePage(User user, DateTime today) {
                   ),
                 ]
             ),
-            homeIndicator(user),
+            homeIndicator(user, currentBucket),
 //            new Text(
 //              today.day.toString() + "-" + today.month.toString() + "-" + today.year.toString() + "-" + today.minute.toString(),
 //              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.grey.withOpacity(1)),
@@ -1531,6 +1542,41 @@ void toggleLeagueOptions() {
 void setLogInState(bool state) {
   _isLoggedIn = state;
 }
+
+class CounterStorage {
+  Future<String> get _localPath async {
+    final directory = await getApplicationDocumentsDirectory();
+
+    return directory.path;
+  }
+
+  Future<File> get _localFile async {
+    final path = await _localPath;
+    return File('$path/counter.txt');
+  }
+
+  Future<int> readCounter() async {
+    try {
+      final file = await _localFile;
+
+      // Read the file
+      String contents = await file.readAsString();
+
+      return int.parse(contents);
+    } catch (e) {
+      // If encountering an error, return 0
+      return 0;
+    }
+  }
+
+  Future<File> writeCounter(int counter) async {
+    final file = await _localFile;
+
+    // Write the file
+    return file.writeAsString('$counter');
+  }
+}
+
 
 
 

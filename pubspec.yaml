@@ -21,6 +21,7 @@ dependencies:
   http: ^0.12.0+1
   clipboard_manager: ^0.0.1
   random_string: ^0.0.2
+  path_provider: ^0.5.0+1
   flutter:
     sdk: flutter
 

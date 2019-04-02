@@ -92,6 +92,10 @@ class Request {
 
   static _updateUserFromJSon(Map<String, dynamic> json,User user){
     var historyList = new List<History>();
+    if(json['data']==("No history available")){
+      user.setStepHistory(historyList);
+      return user;
+    }
     var list = new List<dynamic>();
     list = json['data'];
     for(var i=0;i<list.length;i++){

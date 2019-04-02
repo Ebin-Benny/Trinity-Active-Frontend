@@ -33,5 +33,14 @@ class LeagueMember {
     this.name = name;
   }
 
+  void checkCompletion() {
+    if(this.steps <= this.leagueGoal) {
+      this.isComplete = true;
+    }
+    else {
+      this.isComplete = false;
+    }
+  }
+
 
 }
