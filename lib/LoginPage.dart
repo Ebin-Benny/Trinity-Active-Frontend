@@ -47,12 +47,14 @@ class LoginPageState extends State<LoginPage> {
 
         onLoginStatusChanged(true, profileData: profile);
         //TODO: Add request call here
-        bool userExists = false;
+        bool userExists = await request.Request.userLookup(profileData['id'].toString());
         if(userExists) {
+          print("Exists!");
           this.loggedInUser = new User.newUser(profileData['id'].toString(), profileData['name'].toString());
           this.loggedInUser = await request.Request.getUserHomepage(this.loggedInUser);
         }
         else {
+          print("No User Exists!");
           this.loggedInUser = new User.newUser(profileData['id'].toString(), profileData['name'].toString());
           request.Request.postNewUser(this.loggedInUser);
         }
