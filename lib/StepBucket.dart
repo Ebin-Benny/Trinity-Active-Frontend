@@ -9,6 +9,16 @@ class StepBucket {
     this.stepOffset = 0;
   }
 
+  StepBucket.fromJson(Map<String, dynamic> data) {
+    _step = data['step'];
+    day = data['day'];
+  }
+
+  Map<String, dynamic> toJson() => {
+    'step': _step,
+    'day': day,
+  };
+
   void updateSteps(int step) {
     this._step = step - stepOffset;
   }

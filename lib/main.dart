@@ -17,6 +17,8 @@ import 'package:random_string/random_string.dart';
 import 'StepBucket.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 
 
@@ -45,6 +47,76 @@ class SamplePage extends StatefulWidget {
 
 class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
 
+  File jsonFile;
+  Directory dir;
+  String filename = "stepBucketsTest3.json";
+  bool fileExists = false;
+  Map<String, dynamic> fileContent;
+
+  List<StepBucket> stepBuckets = new List();
+  StepBucket currentBucket = new StepBucket(steps, today.day);
+  bool bucketUpdatedFromFile = false;
+
+
+
+  @override
+  void initState() {
+    super.initState();
+    getApplicationDocumentsDirectory().then((Directory directory) {
+      dir = directory;
+      print("here");
+      jsonFile = new File(directory.path + "/" + filename);
+      fileExists = jsonFile.existsSync();
+      if(fileExists) {
+        this.setState(
+            () => fileContent = json.decode(jsonFile.readAsStringSync())
+        );
+        if(currentBucket.getSteps() < num.parse(fileContent["value"]) && currentBucket.day == num.parse(fileContent["key"])) {
+          currentBucket.updateSteps(num.parse(fileContent["value"]));
+          print(fileContent["value"] + "----------------------------------------------------------");
+          bucketUpdatedFromFile = true;
+        }
+      }
+    });
+    _controller =
+        AnimationController(vsync: this, duration: Duration(seconds: 2));
+
+    _animation = Tween(begin: -1.0, end: 0.0).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.fastOutSlowIn,
+    ));
+  }
+
+  void createFile(Map<String, dynamic> content, Directory dir, String filename) {
+    print("Creating file");
+    File file = new File(dir.path + "/" + filename);
+    file.createSync();
+    fileExists = true;
+    file.writeAsStringSync(json.encode(content));
+  }
+
+  void readJson(File jsonFile) {
+    Map<String, dynamic> jsonFileContent = json.decode(jsonFile.readAsStringSync());
+    print(jsonFileContent.toString());
+
+  }
+
+  void writeToFile(String key, String value) {
+    print("Writing to file.." );
+    Map<String, dynamic> content = {"key": key, "value":value};
+    if(fileExists) {
+      print("File exists");
+      Map<String, dynamic> jsonFileContent = json.decode(jsonFile.readAsStringSync());
+      jsonFileContent.addAll(content);
+      jsonFile.writeAsStringSync(json.encode(jsonFileContent));
+    }
+    else {
+      print("No file exists...");
+      createFile(content, dir, filename);
+    }
+    this.setState(() => fileContent = json.decode(jsonFile.readAsStringSync()));
+  }
+
   int _currentIndex = 1;
 
   AnimationController _controller;
@@ -57,18 +129,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   final addLeagueController = TextEditingController();
   bool showErrorMessage = false;
 
-  @override
-  void initState() {
-    super.initState();
 
-    _controller =
-        AnimationController(vsync: this, duration: Duration(seconds: 2));
-
-    _animation = Tween(begin: -1.0, end: 0.0).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.fastOutSlowIn,
-    ));
-  }
 
   @override
   void dispose() {
@@ -95,8 +156,8 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   List<League> leaguesList = new List();
   static User testUser = new User("0", "not logged in", 0, 0, 0, 1234, 0);
   List<InkWell> leaguesAsWidgets = new List(testUser.leagues.length);
-  List<StepBucket> stepBuckets = new List();
-  StepBucket currentBucket = new StepBucket(steps, today.day);
+
+
 
 
   @override
@@ -144,6 +205,11 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
     if(testUser.getStepHistory().isEmpty) {
       testUser.setStepHistory(history);
     }
+    //If the buckets steps are less than the one saved
+//    if(currentBucket.getSteps() < num.parse(fileContent["value"]) && currentBucket.day == num.parse(fileContent["key"])) {
+//      currentBucket.updateSteps(num.parse(fileContent["value"]));
+//      print("ahhh------------------1");
+//    }
     Widget home = homePage(testUser, today, currentBucket);
     Widget historyScreen = historyPage(testUser);
     Widget leagues = leaguesPage(testUser.leagues);
@@ -403,9 +469,11 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
       testUser.addHistoryEntry(new History(today, currentBucket.getSteps(), testUser.getPersonalGoal()));
       testUser.addHistoryAsCardWidget(new History(today, currentBucket.getSteps(), testUser.getPersonalGoal()));
       StepBucket newBucket = new StepBucket(0, currentBucket.day+1);
+      bucketUpdatedFromFile = false;
       newBucket.stepOffset = testUser.getSteps();
       stepBuckets.add(currentBucket);
       currentBucket = newBucket;
+      print(fileContent.toString());
       print(testUser.getStepHistory().length);
       checkCompletion(currentBucket.getSteps(), testUser.getPersonalGoal());
       for(int i = 0; i < history.length; i++) {
@@ -436,12 +504,22 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
       }
       testUser.setSteps(stepCountValue /*- testUser.getLifetimeSteps()*/);
       steps = stepCountValue;
-
-      if(testUser.getSteps() < currentBucket.getSteps()) {
-        currentBucket.updateSteps(currentBucket.getSteps() + testUser.getSteps());
+      //checks if the
+      writeToFile(currentBucket.day.toString(),currentBucket.getSteps().toString());
+      print(fileContent.toString());
+      if(!bucketUpdatedFromFile) {
+        if(testUser.getSteps() < currentBucket.getSteps()) {
+          currentBucket.updateSteps(currentBucket.getSteps() + testUser.getSteps());
+          print("ahhh------------------2");
+        }
+        else {
+          currentBucket.updateSteps(testUser.getSteps());
+          print("ahhh------------------5");
+        }
       }
       else {
-        currentBucket.updateSteps(testUser.getSteps());
+        currentBucket.updateSteps(currentBucket.getSteps() + testUser.getSteps());
+        print("ahhh------------------6");
       }
       print(currentBucket.toString());
       checkCompletion(currentBucket.getSteps(), testUser.getPersonalGoal());
@@ -1542,45 +1620,4 @@ void toggleLeagueOptions() {
 void setLogInState(bool state) {
   _isLoggedIn = state;
 }
-
-class CounterStorage {
-  Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-
-    return directory.path;
-  }
-
-  Future<File> get _localFile async {
-    final path = await _localPath;
-    return File('$path/counter.txt');
-  }
-
-  Future<int> readCounter() async {
-    try {
-      final file = await _localFile;
-
-      // Read the file
-      String contents = await file.readAsString();
-
-      return int.parse(contents);
-    } catch (e) {
-      // If encountering an error, return 0
-      return 0;
-    }
-  }
-
-  Future<File> writeCounter(int counter) async {
-    final file = await _localFile;
-
-    // Write the file
-    return file.writeAsString('$counter');
-  }
-}
-
-
-
-
-
-
-
 
