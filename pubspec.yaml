@@ -49,6 +49,7 @@ flutter:
     - images/trophy.png
     - images/bullseye-arrow.png
     - images/TrinityActive-logo.png
+    - images/trinity-logo.png
 
 
   # The following line ensures that the Material Icons font is

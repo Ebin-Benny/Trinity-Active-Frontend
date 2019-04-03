@@ -34,6 +34,7 @@ bool showLeagueOptions = false;
 int numberOfLevels = 50;
 bool _isLoggedIn = false;
 
+
 void main() {
   runApp(new MaterialApp(home: new Scaffold(body: new LoginPage())));
 }
@@ -52,6 +53,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   String filename = "stepBucketsTest3.json";
   bool fileExists = false;
   Map<String, dynamic> fileContent;
+  Map<String, dynamic> fileContentSaved;
 
   List<StepBucket> stepBuckets = new List();
   StepBucket currentBucket = new StepBucket(steps, today.day);
@@ -70,6 +72,9 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
       if(fileExists) {
         this.setState(
             () => fileContent = json.decode(jsonFile.readAsStringSync())
+        );
+        this.setState(
+                () => fileContentSaved = fileContent
         );
         if(currentBucket.getSteps() < num.parse(fileContent["value"]) && currentBucket.day == num.parse(fileContent["key"])) {
           currentBucket.updateSteps(num.parse(fileContent["value"]));
@@ -210,7 +215,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
 //      currentBucket.updateSteps(num.parse(fileContent["value"]));
 //      print("ahhh------------------1");
 //    }
-    Widget home = homePage(testUser, today, currentBucket);
+    Widget home = homePage(testUser, today, currentBucket, fileContent, fileContentSaved);
     Widget historyScreen = historyPage(testUser);
     Widget leagues = leaguesPage(testUser.leagues);
     _screens[1] = home;
@@ -222,7 +227,15 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
       drawer: drawerCreator.drawer,
       appBar: new AppBar(
         title:
-        new Text("Trinity Active"),
+        Row(
+          children: <Widget>[
+//            Image.asset(
+//              "images/trinity-logo.png",
+//              scale: 10,
+//            ),
+            new Text("Trinity Active"),
+          ],
+        ),
         actions: <Widget>[
           new SizedBox(
             child:
@@ -498,11 +511,21 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
       // TODO: better implementation of the date changing
       DateTime current = new DateTime.now();
       int stepOffset;
+      int previousStepCountValue;
+      bool stepChanged = false;
       if(current.day != today.day) {
         today = current;
         newDay();
       }
+      if(testUser.getSteps() != stepCountValue) {
+        stepChanged = true;
+      }
+      else {
+        stepChanged = false;
+      }
+      previousStepCountValue = testUser.getSteps();
       testUser.setSteps(stepCountValue /*- testUser.getLifetimeSteps()*/);
+
       steps = stepCountValue;
       //checks if the
       writeToFile(currentBucket.day.toString(),currentBucket.getSteps().toString());
@@ -517,9 +540,9 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
           print("ahhh------------------5");
         }
       }
-      else {
-        currentBucket.updateSteps(currentBucket.getSteps() + testUser.getSteps());
-        print("ahhh------------------6");
+      else if(stepChanged){
+        currentBucket.updateSteps(currentBucket.getSteps() + (testUser.getSteps() - previousStepCountValue));
+        print("ahhh------------------6" + bucketUpdatedFromFile.toString());
       }
       print(currentBucket.toString());
       checkCompletion(currentBucket.getSteps(), testUser.getPersonalGoal());
@@ -1396,7 +1419,7 @@ Widget historyPage(User user) {
   );
 }
 
-Widget homePage(User user, DateTime today, StepBucket currentBucket) {
+Widget homePage(User user, DateTime today, StepBucket currentBucket, Map<String, dynamic> fileContent, Map<String, dynamic> fileContentSaved) {
   return Center(
     child: ListView(
       children: <Widget>[
@@ -1406,6 +1429,8 @@ Widget homePage(User user, DateTime today, StepBucket currentBucket) {
             new Padding(
               padding: EdgeInsets.symmetric(vertical: 5),
             ),
+            new Text(fileContentSaved.toString()),
+            new Text(fileContent.toString()),
             Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -1467,6 +1492,16 @@ Widget homePage(User user, DateTime today, StepBucket currentBucket) {
                         percent: user.getStepHistory().isNotEmpty && user.getStepHistory().length >= 1 ? (user.getStepHistory()[user.getStepHistory().length-1].steps < user.getStepHistory()[user.getStepHistory().length-1].goal ? user.getStepHistory()[user.getStepHistory().length-1].steps / user.getStepHistory()[user.getStepHistory().length-1].goal : 1.0) : 0.0,
                         circularStrokeCap: CircularStrokeCap.round,
                         animation: true,
+                        header: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.calendar_today, color: Colors.grey.withOpacity(0.8), size: 12,),
+                              new Text(
+                                user.getStepHistory().isNotEmpty && user.getStepHistory().length >= 1 ? user.getStepHistory()[user.getStepHistory().length-1].day.day.toString() +"-"+ user.getStepHistory()[user.getStepHistory().length-1].day.month.toString():"",
+                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey.withOpacity(0.8), fontSize: 12),
+                              ),
+                            ]
+                        ),
                         center: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
@@ -1490,6 +1525,16 @@ Widget homePage(User user, DateTime today, StepBucket currentBucket) {
                         percent:  user.getStepHistory().isNotEmpty && user.getStepHistory().length >= 2 ? (user.getStepHistory()[user.getStepHistory().length-2].steps < user.getStepHistory()[user.getStepHistory().length-2].goal ? user.getStepHistory()[user.getStepHistory().length-2].steps / user.getStepHistory()[user.getStepHistory().length-2].goal : 1.0) : 0.0,
                         circularStrokeCap: CircularStrokeCap.round,
                         animation: true,
+                        header: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.calendar_today, color: Colors.grey.withOpacity(0.8), size: 12,),
+                              new Text(
+                                user.getStepHistory().isNotEmpty && user.getStepHistory().length >= 2 ? user.getStepHistory()[user.getStepHistory().length-2].day.day.toString() +"-"+ user.getStepHistory()[user.getStepHistory().length-2].day.month.toString():"",
+                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey.withOpacity(0.8), fontSize: 12),
+                              ),
+                            ]
+                        ),
                         center: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
@@ -1513,6 +1558,16 @@ Widget homePage(User user, DateTime today, StepBucket currentBucket) {
                         percent: user.getStepHistory().isNotEmpty && user.getStepHistory().length >= 3 ? (user.getStepHistory()[user.getStepHistory().length-3].steps < user.getStepHistory()[user.getStepHistory().length-3].goal ? user.getStepHistory()[user.getStepHistory().length-3].steps / user.getStepHistory()[user.getStepHistory().length-3].goal : 1.0) : 0.0,
                         circularStrokeCap: CircularStrokeCap.round,
                         animation: true,
+                        header: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.calendar_today, color: Colors.grey.withOpacity(0.8), size: 12,),
+                              new Text(
+                                user.getStepHistory().isNotEmpty && user.getStepHistory().length >= 3 ? user.getStepHistory()[user.getStepHistory().length-3].day.day.toString() +"-"+ user.getStepHistory()[user.getStepHistory().length-3].day.month.toString():"",
+                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey.withOpacity(0.8), fontSize: 12),
+                              ),
+                            ]
+                        ),
                         center: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
@@ -1541,6 +1596,16 @@ Widget homePage(User user, DateTime today, StepBucket currentBucket) {
                         percent: user.getStepHistory().isNotEmpty && user.getStepHistory().length >= 4 ? (user.getStepHistory()[user.getStepHistory().length-4].steps < user.getStepHistory()[user.getStepHistory().length-4].goal ? user.getStepHistory()[user.getStepHistory().length-4].steps / user.getStepHistory()[user.getStepHistory().length-4].goal : 1.0) : 0.0,
                         circularStrokeCap: CircularStrokeCap.round,
                         animation: true,
+                        header: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.calendar_today, color: Colors.grey.withOpacity(0.8), size: 12,),
+                              new Text(
+                                user.getStepHistory().isNotEmpty && user.getStepHistory().length >= 4 ? user.getStepHistory()[user.getStepHistory().length-4].day.day.toString() +"-"+ user.getStepHistory()[user.getStepHistory().length-4].day.month.toString():"",
+                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey.withOpacity(0.8), fontSize: 12),
+                              ),
+                            ]
+                        ),
                         center: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
@@ -1565,6 +1630,16 @@ Widget homePage(User user, DateTime today, StepBucket currentBucket) {
                         percent: user.getStepHistory().isNotEmpty && user.getStepHistory().length >= 5 ? (user.getStepHistory()[user.getStepHistory().length-5].steps < user.getStepHistory()[user.getStepHistory().length-5].goal ? user.getStepHistory()[user.getStepHistory().length-5].steps / user.getStepHistory()[user.getStepHistory().length-5].goal : 1.0) : 0.0,
                         circularStrokeCap: CircularStrokeCap.round,
                         animation: true,
+                        header: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.calendar_today, color: Colors.grey.withOpacity(0.8), size: 12,),
+                              new Text(
+                                user.getStepHistory().isNotEmpty && user.getStepHistory().length >= 5 ? user.getStepHistory()[user.getStepHistory().length-5].day.day.toString() +"-"+ user.getStepHistory()[user.getStepHistory().length-5].day.month.toString():"",
+                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey.withOpacity(0.8), fontSize: 12),
+                              ),
+                            ]
+                        ),
                         center: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
