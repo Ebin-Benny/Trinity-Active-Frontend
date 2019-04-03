@@ -1480,6 +1480,7 @@ Widget homePage(User user, DateTime today, StepBucket currentBucket, Map<String,
                     ),
 
                   ),
+                  new Padding(padding: EdgeInsets.symmetric(vertical: 2)),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: <Widget>[
