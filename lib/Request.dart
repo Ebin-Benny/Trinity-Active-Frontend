@@ -68,10 +68,10 @@ class Request {
     });
   }
 
-  static Future<String> postNewLeague(String leagueName,User user) async{
+  static Future<String> postNewLeague(League league,LeagueMember member) async{
     //Create a new league with the user in it and returns the leagueId
     String res = "";
-    await http.post(Uri.encodeFull("http://68.183.45.201:3001/createNewLeague?name="+leagueName+"&memberId="+user.getUserID()+"&userName="+user.getName())).then((result) {
+    await http.post(Uri.encodeFull("http://68.183.45.201:3001/createNewLeague?name="+league.name+"&memberId="+member.userId+"&userName="+member.name)).then((result) {
       //handle response code
       if(result.statusCode != 200){
         throw Exception("fail to post info to the server");
