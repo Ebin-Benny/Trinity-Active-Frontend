@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import 'User.dart';
 import 'dart:convert';
 import 'History.dart';
+import 'League.dart';
+import 'LeagueMember.dart';
 
 class Request {
 
@@ -58,7 +60,7 @@ class Request {
 
   static addUserToLeague(String leagueID,User user) async{
     //Takes an existing leagueID and add the user to the league corresponding
-    http.patch(Uri.encodeFull("http://68.183.45.201:3001/addLeagueMember"), body: {"leagueId": leagueID, "memberId": user.getUserID()}).then((result) {
+    http.patch(Uri.encodeFull("http://68.183.45.201:3001/addLeagueMember?leagueId="+leagueID+"&memberId="+user.getUserID()+"&userName="+user.getName())).then((result) {
       //handle response code
       if(result.statusCode != 200){
         throw Exception("fail to patch info to the server");
@@ -69,7 +71,7 @@ class Request {
   static Future<String> postNewLeague(String leagueName,User user) async{
     //Create a new league with the user in it and returns the leagueId
     String res = "";
-    await http.post(Uri.encodeFull("http://68.183.45.201:3001/createNewLeague"), body: {"name": leagueName, "memberId": user.getUserID()}).then((result) {
+    await http.post(Uri.encodeFull("http://68.183.45.201:3001/createNewLeague?name="+leagueName+"&memberId="+user.getUserID()+"&userName="+user.getName())).then((result) {
       //handle response code
       if(result.statusCode != 200){
         throw Exception("fail to post info to the server");
@@ -79,6 +81,24 @@ class Request {
       }
     });
     return res;
+  }
+
+  static Future<League> getLeague(String leagueID) async {
+    var uri = new Uri.http('68.183.45.201:3001','getLeague/'+leagueID);
+    var response = await http.get(uri);
+    if(response.statusCode == 200){
+      var res = json.decode(response.body)['data'];
+      var league = new League(10000,res['leagueName']);
+      var list = new List<dynamic>();
+      list = res['members'];
+      for(var i=0;i<list.length;i++){
+        league.addMember(new LeagueMember(list[i]['memberId'], list[i]['name'], leagueID, list[i]['score']));
+      }
+      return league;
+    }
+    else{
+      throw Exception('failed to get league from the server');
+    }
   }
 
   static updateUserSteps(User user) async{
