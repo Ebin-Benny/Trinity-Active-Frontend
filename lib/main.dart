@@ -57,7 +57,9 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
 
   List<StepBucket> stepBuckets = new List();
   StepBucket currentBucket = new StepBucket(steps, today.day);
-  bool bucketUpdatedFromFile = false;
+  bool bucketUpdatedFromFile = true;
+
+  bool updatedStep = false;
 
 
 
@@ -76,10 +78,13 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
         this.setState(
                 () => fileContentSaved = fileContent
         );
-        if(currentBucket.getSteps() < num.parse(fileContent["value"]) && currentBucket.day == num.parse(fileContent["key"])) {
+        if(/*currentBucket.getSteps() < num.parse(fileContent["value"])*/currentBucket.day == num.parse(fileContent["key"])) {
           currentBucket.updateSteps(num.parse(fileContent["value"]));
           print(fileContent["value"] + "----------------------------------------------------------");
           bucketUpdatedFromFile = true;
+        }
+        else {
+          bucketUpdatedFromFile = false;
         }
       }
     });
@@ -477,23 +482,25 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
 
   void newDay() async {
     setState(() {
+
       testUser.setLifetimeSteps(testUser.getLifetimeSteps() + currentBucket.getSteps());
       testUser.updateLevel();
       testUser.addHistoryEntry(new History(today, currentBucket.getSteps(), testUser.getPersonalGoal()));
       testUser.addHistoryAsCardWidget(new History(today, currentBucket.getSteps(), testUser.getPersonalGoal()));
+
+
       StepBucket newBucket = new StepBucket(0, currentBucket.day+1);
       bucketUpdatedFromFile = false;
       newBucket.stepOffset = testUser.getSteps();
       stepBuckets.add(currentBucket);
       currentBucket = newBucket;
-      print(fileContent.toString());
-      print(testUser.getStepHistory().length);
       checkCompletion(currentBucket.getSteps(), testUser.getPersonalGoal());
       for(int i = 0; i < history.length; i++) {
         print(testUser.getStepHistory()[i].steps.toString() + "  index:" + i.toString());
       }
 
       testUser.updateCardHistory();
+
       isCompleted = false;
       //totalSteps = 0;
     });
@@ -533,7 +540,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
       if(!bucketUpdatedFromFile) {
         if(testUser.getSteps() < currentBucket.getSteps()) {
           currentBucket.updateSteps(currentBucket.getSteps() + testUser.getSteps());
-          print("ahhh------------------2");
+          print("ahhh------------------2----------------------------------------------------------------------------------------------------");
         }
         else {
           currentBucket.updateSteps(testUser.getSteps());
@@ -542,6 +549,10 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
       }
       else if(stepChanged){
         currentBucket.updateSteps(currentBucket.getSteps() + (testUser.getSteps() - previousStepCountValue));
+        if(stepCountValue != 0 && !updatedStep) {
+          currentBucket.updateSteps(currentBucket.getSteps()-stepCountValue);
+          updatedStep = true;
+        }
         print("ahhh------------------6" + bucketUpdatedFromFile.toString());
       }
       print(currentBucket.toString());
