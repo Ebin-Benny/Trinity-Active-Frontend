@@ -373,7 +373,20 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
 //                          hardcodedLeague.addMember(new LeagueMember(testUser.userID, testUser.name, "dEOwJo", 368));
 //                          testUser.addLeague(hardcodedLeague);
 //                          hardcodedLeague.updateLeaderboard();
-                          toggleLeagueOptions();
+                          if(addLeagueController.text.isNotEmpty) {
+                            League league;
+                            Request.getLeague(addLeagueController.text).then((League returned) {
+                              league = returned;
+                              if(league != null) {
+                                setState(() {
+                                  Request.addUserToLeague(league.leagueID, testUser);
+                                  testUser.addLeague(league);
+                                });
+                              }
+                            });
+                            toggleLeagueOptions();
+                          }
+
                         },
                       ),
                     ],
@@ -1048,7 +1061,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                               end: FractionalOffset.topCenter,
                               colors: [
                                 Colors.lightBlueAccent,
-                                Colors.blueAccent,
+                                Colors.lightBlue,
                               ]
                           ),
                           border: new Border.all(
