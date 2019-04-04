@@ -12,7 +12,7 @@ class Request {
   static Future<User> getUserHomepage(User user) async {
     //Takes an user and return update it with the last 5 days
     var uri = new Uri.http('68.183.45.201:3001','getUserHomepage/'+user.getUserID());
-    //var uri = '68.183.45.201:3001/getUserHomepage/5c922af211d76f46182883f2';
+    //var uri = new Uri.http('68.183.45.201:3001','getUserHomepage/'+'2224960227567988');
     var response = await http.get(uri);
     if(response.statusCode == 200){
       //success : we have a json
@@ -92,7 +92,7 @@ class Request {
       var list = new List<dynamic>();
       list = res['members'];
       for(var i=0;i<list.length;i++){
-        league.addMember(new LeagueMember(list[i]['memberId'], list[i]['name'], leagueID, list[i]['score']));
+        league.addMember(new LeagueMember(list[i]['memberId'], list[i]['name'], list[i]['leagueId'], list[i]['score']));
       }
       print(league.leagueID);
       return league;
