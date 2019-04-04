@@ -150,6 +150,11 @@ class User {
   }
 
   void addLeague(League league) {
+    for(League l in this.leagues) {
+      if(l.leagueID == league.leagueID && league.leagueID != null) {
+        return;
+      }
+    }
     this.leagues.add(league);
   }
 

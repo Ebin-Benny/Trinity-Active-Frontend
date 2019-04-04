@@ -112,10 +112,10 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   }
 
   void writeToFile(String key, String value) {
-    print("Writing to file.." );
+    //print("Writing to file.." );
     Map<String, dynamic> content = {"key": key, "value":value};
     if(fileExists) {
-      print("File exists");
+      //print("File exists");
       Map<String, dynamic> jsonFileContent = json.decode(jsonFile.readAsStringSync());
       jsonFileContent.addAll(content);
       jsonFile.writeAsStringSync(json.encode(jsonFileContent));
@@ -239,6 +239,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
 //              scale: 10,
 //            ),
             new Text("Trinity Active"),
+            new Text(testUser.leagues.length.toString()),
           ],
         ),
         actions: <Widget>[
@@ -536,7 +537,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
       steps = stepCountValue;
       //checks if the
       writeToFile(currentBucket.day.toString(),currentBucket.getSteps().toString());
-      print(fileContent.toString());
+      //print(fileContent.toString());
       if(!bucketUpdatedFromFile) {
         if(testUser.getSteps() < currentBucket.getSteps()) {
           currentBucket.updateSteps(currentBucket.getSteps() + testUser.getSteps());
@@ -555,7 +556,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
         }
         print("ahhh------------------6" + bucketUpdatedFromFile.toString());
       }
-      print(currentBucket.toString());
+      //print(currentBucket.toString());
       checkCompletion(currentBucket.getSteps(), testUser.getPersonalGoal());
     });
   }
@@ -660,7 +661,8 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
       this.leaguesAsWidgets[i] = leagueSummary(leagues[i]);
     }
     return Scaffold(
-      body: GridView.count(
+      body:
+      GridView.count(
         crossAxisCount: 2,
         childAspectRatio: .8,
         children: this.leaguesAsWidgets,
@@ -880,10 +882,33 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                     onPressed: () {
                       if(stepController.text.isNotEmpty && nameController.text.isNotEmpty) {
                         newLeague = new League(num.parse(stepController.text), nameController.text);
-                        newLeague.leagueID = randomAlpha(6);
-                        newLeague.addMember(new LeagueMember(currentUser.userID, currentUser.name, newLeague.leagueID, 0));
-                        print(newLeague.leagueID);
-                        currentUser.addLeague(newLeague);
+//                        newLeague.leagueID = randomAlpha(6);
+//                        newLeague.addMember(new LeagueMember(currentUser.userID, currentUser.name, newLeague.leagueID, 0));
+//                        print(newLeague.leagueID);
+//                        currentUser.addLeague(newLeague);
+                        LeagueMember thisMember = new LeagueMember.leagueless(currentUser.userID, currentUser.name, 0);
+                        String leagueId;
+                        Request.postNewLeague(newLeague, thisMember).then((String id) {
+                          leagueId = id;
+                          Request.getLeague(leagueId).then((League returned){
+                            newLeague = returned;
+                            print("--------------");
+                            //print(newLeague.leagueID);
+                            print(newLeague.members[0].name);
+                            print("--------------");
+                            if(newLeague != null) {
+                              setState(() {
+                                currentUser.addLeague(newLeague);
+                                print("ADDED!");
+                              });
+                            }
+                          });
+                        });
+                        print(currentUser.leagues.length);
+
+
+
+
                         _currentIndex = 2;
                         stepController.clear();
                         durationController.clear();
@@ -1065,11 +1090,11 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: <Widget>[
-                                    new Text(
-                                      league.leagueID,
-                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25, color: Colors.black.withOpacity(0.6)),
-                                      textAlign: TextAlign.center,
-                                    ),
+//                                    new Text(
+//                                      league.leagueID,
+//                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25, color: Colors.black.withOpacity(0.6)),
+//                                      textAlign: TextAlign.center,
+//                                    ),
                                   ],
                                 ),
                               ),

@@ -33,6 +33,12 @@ class LeagueMember {
     this.name = name;
   }
 
+  LeagueMember.leagueless (String userID, String name, int score) {
+    this.userId = userID;
+    this.score = score;
+    this.name = name;
+  }
+
   void checkCompletion() {
     if(this.steps <= this.leagueGoal) {
       this.isComplete = true;
