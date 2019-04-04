@@ -21,6 +21,12 @@ class League {
     }
   }
 
+  League.withID(int goal, String name, String id) {
+    this.name = name;
+    this.goal = goal;
+    this.leagueID = id;
+  }
+
   //Test contructor TODO: REMOVE
   League.asTestLeague (int goal, String name, String leagueID) {
     this.goal = goal;

@@ -88,12 +88,13 @@ class Request {
     var response = await http.get(uri);
     if(response.statusCode == 200){
       var res = json.decode(response.body)['data'];
-      var league = new League(10000,res['leagueName']);
+      var league = new League.withID(10000,res['leagueName'],leagueID);
       var list = new List<dynamic>();
       list = res['members'];
       for(var i=0;i<list.length;i++){
         league.addMember(new LeagueMember(list[i]['memberId'], list[i]['name'], leagueID, list[i]['score']));
       }
+      print(league.leagueID);
       return league;
     }
     else{

@@ -903,10 +903,11 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                         String leagueId;
                         Request.postNewLeague(newLeague, thisMember).then((String id) {
                           leagueId = id;
+                          thisMember.setLeagueId(leagueId);
                           Request.getLeague(leagueId).then((League returned){
                             newLeague = returned;
                             print("--------------");
-                            //print(newLeague.leagueID);
+                            print(newLeague.leagueID);
                             print(newLeague.members[0].name);
                             print("--------------");
                             if(newLeague != null) {
@@ -1103,11 +1104,11 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: <Widget>[
-//                                    new Text(
-//                                      league.leagueID,
-//                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25, color: Colors.black.withOpacity(0.6)),
-//                                      textAlign: TextAlign.center,
-//                                    ),
+                                    new Text(
+                                      league.leagueID,
+                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25, color: Colors.black.withOpacity(0.6)),
+                                      textAlign: TextAlign.center,
+                                    ),
                                   ],
                                 ),
                               ),
@@ -1119,7 +1120,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                                   size: 40,
                                 ),
                                 onPressed: () {
-                                  ClipboardData data = new ClipboardData(text: "aJk4Tz");
+                                  ClipboardData data = new ClipboardData(text: league.leagueID);
                                   Clipboard.setData(data);
                                 },
                               )

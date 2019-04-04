@@ -39,6 +39,10 @@ class LeagueMember {
     this.name = name;
   }
 
+  void setLeagueId(String id) {
+    this.leagueID = id;
+  }
+
   void checkCompletion() {
     if(this.steps <= this.leagueGoal) {
       this.isComplete = true;
