@@ -110,7 +110,7 @@ class History {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   LinearPercentIndicator(
-                    animation: true,
+                    animation: false,
                     width: 300,
                     lineHeight: 10,
                     progressColor: this.isComplete ? Colors.lightGreenAccent : Colors.blue,

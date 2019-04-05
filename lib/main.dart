@@ -379,10 +379,17 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                             Request.getLeague(addLeagueController.text).then((League returned) {
                               league = returned;
                               if(league != null) {
+                                bool result = false;
                                 setState(() {
 
-                                  testUser.addLeague(league);
+                                  result = testUser.addLeague(league);
                                 });
+                                if(result) {
+                                  _showDialog(league.name.toString(), "has been added.", 0);
+                                }
+                                else {
+                                  _showDialog(league.name.toString(), "has already been added", 0);
+                                }
                               }
                             });
                             toggleLeagueOptions();
@@ -579,6 +586,68 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   void _onError(error) => print("Flutter Pedometer Error: $error");
 
   void _onCancel() => _subscription.cancel();
+
+  void _showDialog(String title, String body, int type) {
+    if(type == 0) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          // return object of type Dialog
+          return AlertDialog(
+            title: Column(
+              children: <Widget>[
+                new Padding(padding: EdgeInsets.symmetric(vertical: 10)),
+                new Icon(
+                  Icons.group,
+                  size: 35,
+                  color: Colors.blue[700],
+                ),
+                new Text(
+                  title,
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25, color: Colors.blue[700]),
+                ),
+              ],
+            ),
+            content: new Text(
+              body,
+              style: TextStyle(color: Colors.grey),
+              textAlign: TextAlign.center,
+            ),
+            actions: <Widget>[
+              // usually buttons at the bottom of the dialog
+              new FlatButton(
+                child: new Text("Close"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+    else {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          // return object of type Dialog
+          return AlertDialog(
+            title: new Text(title),
+            content: new Text(body),
+            actions: <Widget>[
+              // usually buttons at the bottom of the dialog
+              new FlatButton(
+                child: new Text("Close"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
 
   //TODO : temp implementation
   void checkCompletion(int steps, int goal) {
@@ -912,6 +981,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                             print(newLeague.members[0].name);
                             print("--------------");
                             if(newLeague != null) {
+                              _showDialog(newLeague.name, "has been created", 0);
                               setState(() {
                                 currentUser.addLeague(newLeague);
                                 print("ADDED!");
@@ -1731,7 +1801,6 @@ void toggleGoalOptions() {
   }
 
 }
-
 void toggleLeagueOptions() {
   if(showLeagueOptions) {
     showLeagueOptions = false;

@@ -149,13 +149,14 @@ class User {
     return highestStep;
   }
 
-  void addLeague(League league) {
+  bool addLeague(League league) {
     for(League l in this.leagues) {
       if(l.leagueID == league.leagueID && league.leagueID != null) {
-        return;
+        return false;
       }
     }
     this.leagues.add(league);
+    return true;
   }
 
   void hardCodeHistory() {
