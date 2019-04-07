@@ -1,3 +1,5 @@
+import 'package:circular_indicator_test/LeagueMember.dart';
+
 import 'History.dart';
 import 'package:flutter/material.dart';
 import 'League.dart';
@@ -13,6 +15,7 @@ class User {
   int level = 1;
   List<League> leagues = new List();
   List<Widget> historyAsCardWidgets = new List();
+  List<LeagueMember> usersLeagueMembers = new List();
 
   User(String userID, String name, int steps, int personalGoal, int multiplier, int lifetimeSteps, int level) {
     this.name = name;

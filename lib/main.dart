@@ -58,8 +58,10 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   List<StepBucket> stepBuckets = new List();
   StepBucket currentBucket = new StepBucket(steps, today.day);
   bool bucketUpdatedFromFile = true;
-
+  bool isNewDayFromFile = false;
   bool updatedStep = false;
+
+  int debugStepStream = 0;
 
 
 
@@ -78,13 +80,15 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
         this.setState(
                 () => fileContentSaved = fileContent
         );
-        if(/*currentBucket.getSteps() < num.parse(fileContent["value"])*/currentBucket.day == num.parse(fileContent["key"])) {
+        if(currentBucket.day == num.parse(fileContent["key"])) {
           currentBucket.updateSteps(num.parse(fileContent["value"]));
           print(fileContent["value"] + "----------------------------------------------------------");
           bucketUpdatedFromFile = true;
         }
         else {
+          isNewDayFromFile = true;
           bucketUpdatedFromFile = false;
+          currentBucket.updateSteps(0);
         }
       }
     });
@@ -220,7 +224,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
 //      currentBucket.updateSteps(num.parse(fileContent["value"]));
 //      print("ahhh------------------1");
 //    }
-    Widget home = homePage(testUser, today, currentBucket, fileContent, fileContentSaved);
+    Widget home = homePage(testUser, today, currentBucket, fileContent, fileContentSaved,debugStepStream);
     Widget historyScreen = historyPage(testUser);
     Widget leagues = leaguesPage(testUser.leagues);
     _screens[1] = home;
@@ -239,7 +243,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
 //              scale: 10,
 //            ),
             new Text("Trinity Active"),
-            new Text(testUser.leagues.length.toString()),
+            //new Text(testUser.leagues.length.toString()),
           ],
         ),
         actions: <Widget>[
@@ -379,6 +383,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                             Request.getLeague(addLeagueController.text).then((League returned) {
                               league = returned;
                               if(league != null) {
+//                                league.addMember(new LeagueMember(testUser.userID, testUser.name, league.leagueID, 1));
                                 bool result = false;
                                 setState(() {
 
@@ -539,6 +544,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
     setState(() {
       // TODO: better implementation of the date changing
       DateTime current = new DateTime.now();
+      debugStepStream = stepCountValue;
       int stepOffset;
       int previousStepCountValue;
       bool stepChanged = false;
@@ -546,39 +552,45 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
         today = current;
         newDay();
       }
-      if(testUser.getSteps() != stepCountValue) {
-        stepChanged = true;
-      }
       else {
-        stepChanged = false;
-      }
-      previousStepCountValue = testUser.getSteps();
-      testUser.setSteps(stepCountValue /*- testUser.getLifetimeSteps()*/);
-
-      steps = stepCountValue;
-      //checks if the
-      writeToFile(currentBucket.day.toString(),currentBucket.getSteps().toString());
-      //print(fileContent.toString());
-      if(!bucketUpdatedFromFile) {
-        if(testUser.getSteps() < currentBucket.getSteps()) {
-          currentBucket.updateSteps(currentBucket.getSteps() + testUser.getSteps());
-          print("ahhh------------------2----------------------------------------------------------------------------------------------------");
+        if(testUser.getSteps() != stepCountValue) {
+          stepChanged = true;
         }
         else {
-          currentBucket.updateSteps(testUser.getSteps());
-          print("ahhh------------------5");
+          stepChanged = false;
         }
-      }
-      else if(stepChanged){
-        currentBucket.updateSteps(currentBucket.getSteps() + (testUser.getSteps() - previousStepCountValue));
-        if(stepCountValue != 0 && !updatedStep) {
-          currentBucket.updateSteps(currentBucket.getSteps()-stepCountValue);
-          updatedStep = true;
+        previousStepCountValue = testUser.getSteps();
+        testUser.setSteps(stepCountValue /*- testUser.getLifetimeSteps()*/);
+
+        steps = stepCountValue;
+        //checks if the
+        writeToFile(currentBucket.day.toString(),currentBucket.getSteps().toString());
+        //print(fileContent.toString());
+        if(!bucketUpdatedFromFile) {
+          if(testUser.getSteps() < currentBucket.getSteps()) {
+            currentBucket.updateSteps(currentBucket.getSteps() + testUser.getSteps());
+            print("ahhh------------------2----------------------------------------------------------------------------------------------------");
+          }
+          else if(isNewDayFromFile) {
+            currentBucket.stepOffset = testUser.getSteps();
+            isNewDayFromFile = false;
+          }
+          else {
+            currentBucket.updateSteps(testUser.getSteps());
+            print("ahhh------------------5");
+          }
         }
-        print("ahhh------------------6" + bucketUpdatedFromFile.toString());
+        else if(stepChanged){
+          currentBucket.updateSteps(currentBucket.getSteps() + (testUser.getSteps() - previousStepCountValue));
+          if(stepCountValue != 0 && !updatedStep) {
+            currentBucket.updateSteps(currentBucket.getSteps()-stepCountValue);
+            updatedStep = true;
+          }
+          print("ahhh------------------6" + bucketUpdatedFromFile.toString());
+        }
+        //print(currentBucket.toString());
+        checkCompletion(currentBucket.getSteps(), testUser.getPersonalGoal());
       }
-      //print(currentBucket.toString());
-      checkCompletion(currentBucket.getSteps(), testUser.getPersonalGoal());
     });
   }
   void _onDone() => print("Finished pedometer tracking");
@@ -1177,7 +1189,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                                   children: <Widget>[
                                     new Text(
                                       league.leagueID,
-                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25, color: Colors.black.withOpacity(0.6)),
+                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25, color: Colors.grey),
                                       textAlign: TextAlign.center,
                                     ),
                                   ],
@@ -1540,7 +1552,7 @@ Widget historyPage(User user) {
   );
 }
 
-Widget homePage(User user, DateTime today, StepBucket currentBucket, Map<String, dynamic> fileContent, Map<String, dynamic> fileContentSaved) {
+Widget homePage(User user, DateTime today, StepBucket currentBucket, Map<String, dynamic> fileContent, Map<String, dynamic> fileContentSaved, int debugStepStream) {
   return Center(
     child: ListView(
       children: <Widget>[
@@ -1551,6 +1563,8 @@ Widget homePage(User user, DateTime today, StepBucket currentBucket, Map<String,
               padding: EdgeInsets.symmetric(vertical: 5),
             ),
             new Text(fileContentSaved.toString()),
+            new Text("stepStream : " + debugStepStream.toString()),
+            new Text("offset : " + currentBucket.stepOffset.toString()),
             new Text(fileContent.toString()),
             Row(
                 mainAxisAlignment: MainAxisAlignment.center,
