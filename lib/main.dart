@@ -63,6 +63,8 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
 
   int debugStepStream = 0;
 
+  int timer = 0;
+
 
 
   @override
@@ -232,6 +234,14 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
     _screens[2] = leagues;
     _screens[4] = addLeaguePage(context, setLeagueNameController, setLeagueGoalController, setLeagueDurationController, testUser);
     DrawerCreator drawerCreator = new DrawerCreator(testUser, context);
+
+    timer = timer + 1;
+    //60 FPS AVG
+    if(timer %  3600 == 0) {
+      Request.updateUserSteps(testUser, currentBucket);
+      timer = 0;
+    }
+
     return Scaffold(
       drawer: drawerCreator.drawer,
       appBar: new AppBar(
@@ -510,10 +520,17 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   void newDay() async {
     setState(() {
 
+      Request.updateUserSteps(testUser, currentBucket);
       testUser.setLifetimeSteps(testUser.getLifetimeSteps() + currentBucket.getSteps());
       testUser.updateLevel();
-      testUser.addHistoryEntry(new History(today, currentBucket.getSteps(), testUser.getPersonalGoal()));
-      testUser.addHistoryAsCardWidget(new History(today, currentBucket.getSteps(), testUser.getPersonalGoal()));
+//      testUser.addHistoryEntry(new History(today, currentBucket.getSteps(), testUser.getPersonalGoal()));
+//      testUser.addHistoryAsCardWidget(new History(today, currentBucket.getSteps(), testUser.getPersonalGoal()));
+      print("||||||||||||||||||||||||||REQUEST FOR USER||||||||||||||||||||||||||||||");
+      Request.getUserHomepage(testUser).then((User user) {
+        testUser = user;
+        testUser.updateCardHistory();
+        print("||||||||||||||||||||||||||REQUEST RETURNED USER||||||||||||||||||||||||||||||");
+      });
 
 
       StepBucket newBucket = new StepBucket(0, currentBucket.day+1);

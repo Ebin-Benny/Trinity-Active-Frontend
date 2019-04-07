@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'History.dart';
 import 'League.dart';
 import 'LeagueMember.dart';
+import 'StepBucket.dart';
 
 class Request {
 
@@ -58,6 +59,12 @@ class Request {
   }
 
 
+  //We need a request to updateLeagueMember(LeagueMember member, League league) {
+
+
+
+  //}
+
   static addUserToLeague(String leagueID,User user) async{
     //Takes an existing leagueID and add the user to the league corresponding
     http.patch(Uri.encodeFull("http://68.183.45.201:3001/addLeagueMember?leagueId="+leagueID+"&memberId="+user.getUserID()+"&userName="+user.getName())).then((result) {
@@ -102,9 +109,9 @@ class Request {
     }
   }
 
-  static updateUserSteps(User user) async{
+  static updateUserSteps(User user, StepBucket bucket) async{
     //update the steps of the user in the database
-    var uri = new Uri.http('68.183.45.201:3001','/updateUser/'+user.getUserID(),{"steps" : user.getSteps().toString()});
+    var uri = new Uri.http('68.183.45.201:3001','/updateUser/'+user.getUserID(),{"steps" : bucket.getSteps().toString()});
     var result = await http.get(uri);
     if(result.statusCode != 200){
       throw Exception("fail to post info to the server");
@@ -118,11 +125,12 @@ class Request {
       return user;
     }
     var list = new List<dynamic>();
-    list = json['data'];
+    list = json['data']['hist'];
     for(var i=0;i<list.length;i++){
           var md = list[i]['day'].split('-');
           var date = new DateTime(list[i]['year'],int.parse(md[1]),int.parse(md[0]));
           historyList.add(new History(date,list[i]['steps'], list[i]['goal']));
+          print(date.toString() + "  " + list[i]['steps'].toString());
         }
     user.setStepHistory(historyList);
     return user;

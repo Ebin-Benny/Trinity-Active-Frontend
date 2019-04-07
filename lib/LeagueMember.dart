@@ -1,4 +1,5 @@
 import 'User.dart';
+import 'MultiplierBucket.dart';
 class LeagueMember {
   //UserID that the league member is related to
   String userId;
@@ -22,6 +23,8 @@ class LeagueMember {
 
   bool isComplete = false;
 
+  MultiplierBucket multiplierBucket;
+
   bool getIsComplete() {
     return this.isComplete;
   }
@@ -31,6 +34,7 @@ class LeagueMember {
     this.leagueID = leagueID;
     this.score = score;
     this.name = name;
+    this.multiplierBucket = new MultiplierBucket(multiplier, steps);
   }
 
   LeagueMember.leagueless (String userID, String name, int score) {
@@ -44,7 +48,7 @@ class LeagueMember {
   }
 
   void checkCompletion() {
-    if(this.steps <= this.leagueGoal) {
+    if(steps <= this.leagueGoal) {
       this.isComplete = true;
     }
     else {

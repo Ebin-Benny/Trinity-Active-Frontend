@@ -153,6 +153,7 @@ class User {
   }
 
   bool addLeague(League league) {
+    updateUserAsLeagueMembersList();
     for(League l in this.leagues) {
       if(l.leagueID == league.leagueID && league.leagueID != null) {
         return false;
@@ -176,5 +177,23 @@ class User {
       temp.add(this.stepHistory[i].toWidget());
     }
     this.historyAsCardWidgets = temp;
+  }
+
+  //called when new league is added
+  void updateUserAsLeagueMembersList() {
+    for(int i = 0; i < this.leagues.length; i++) {
+      for(int j = 0; j < this.leagues[i].members.length; j++) {
+        if(this.leagues[i].members[j].userId == this.userID) {
+          usersLeagueMembers.add(this.leagues[i].members[j]);
+        }
+      }
+    }
+  }
+
+//Called periodically, maybe like every 30 mins or so
+  void updateUserAsLeagueMembersSteps(int steps) {
+    for(int i = 0; i < this.usersLeagueMembers.length; i++) {
+
+    }
   }
 }
