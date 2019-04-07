@@ -131,7 +131,17 @@ class Request {
           var date = new DateTime(list[i]['year'],int.parse(md[1]),int.parse(md[0]));
           historyList.add(new History(date,list[i]['steps'], list[i]['goal']));
           print(date.toString() + "  " + list[i]['steps'].toString());
-        }
+    }
+    list = json['data']['league'];
+    for(var i=0;i<list.length;i++){
+          String id = list[i].toString();
+          League league;
+          Request.getLeague(id).then((League result){
+            league = result;
+            user.addLeague(league);
+          });
+
+    }
     user.setStepHistory(historyList);
     return user;
   }
