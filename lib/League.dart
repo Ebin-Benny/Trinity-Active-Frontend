@@ -53,6 +53,7 @@ class League {
   void addMember(LeagueMember newMember) {
     this.members.add(newMember);
     updateLeaderboard();
+    setMembersLeagueGoal();
   }
 
   void updateLeaderboard() {
@@ -116,5 +117,11 @@ class League {
       leaderboard.add(listTile);
     }
     return leaderboard;
+  }
+
+  void setMembersLeagueGoal() {
+    for(int i = 0; i < this.members.length; i++) {
+      this.members[i].leagueGoal = this.goal;
+    }
   }
 }

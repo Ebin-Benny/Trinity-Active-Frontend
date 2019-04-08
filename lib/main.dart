@@ -207,17 +207,6 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
             //new Text(testUser.leagues.length.toString()),
           ],
         ),
-        actions: <Widget>[
-          new SizedBox(
-            child:
-            RaisedButton(
-              color: Colors.blue,
-              onPressed: newDay,
-              child:
-              Text("NEW DAY"),
-            ),
-          ),
-        ],
       ),
 
       floatingActionButton: showGoalOptions ? goalOptions() : null,
@@ -352,6 +341,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                                 });
                                 if(result) {
                                   _showDialog(league.name.toString(), "has been added.", 0);
+                                  updateLeaguesScore(testUser, currentBucket);
                                 }
                                 else {
                                   _showDialog(league.name.toString(), "has already been added", 0);
@@ -406,7 +396,9 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                     children: <Widget>[
                       IconButton(
                         icon: Icon(Icons.close),
-                        onPressed: toggleGoalOptions,
+                        onPressed: () {
+                          toggleGoalOptions;
+                          },
                       )
                     ],
                   ),
@@ -442,6 +434,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                         onPressed: () {
                           toggleGoalOptions();
                           setGoal(num.parse(textController.text));
+                          Request.updateGoal(testUser);
                         },
                       ),
                     ],
@@ -470,7 +463,9 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
 
   void newDay() async {
     setState(() {
-
+      for(int i = 0; i < testUser.usersLeagueMembers.length; i++) {
+        testUser.usersLeagueMembers[i].hasUpdatedToday = false;
+      }
       Request.updateUserSteps(testUser, currentBucket);
       testUser.setLifetimeSteps(testUser.getLifetimeSteps() + currentBucket.getSteps());
       testUser.updateLevel();
@@ -510,14 +505,16 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
 
   void _onData(int stepCountValue) async {
     setState(() {
-      timer = timer + 1;
-      print(timer);
       //60 FPS AVG
-      if(timer %  240 == 0) {
+      timer = timer + 1;
+      if(timer %  1800 == 0) {
         Request.updateUserSteps(testUser, currentBucket);
         print("|||||||||||||||||||||||UPDATED STEPS||||||||||||||||||||||||");
         timer = 0;
+
+        updateLeaguesScore(testUser, currentBucket);
       }
+
       // TODO: better implementation of the date changing
       DateTime current = new DateTime.now();
       debugStepStream = stepCountValue;
@@ -564,6 +561,10 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
         //print(currentBucket.toString());
         checkCompletion(currentBucket.getSteps(), testUser.getPersonalGoal());
       }
+
+
+
+
     });
   }
   void _onDone() => print("Finished pedometer tracking");
@@ -573,7 +574,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   void _onCancel() => _subscription.cancel();
 
   void _showDialog(String title, String body, int type) {
-    if(type == 0) {
+    if(type == 0 || type == 1) {
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -583,7 +584,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
               children: <Widget>[
                 new Padding(padding: EdgeInsets.symmetric(vertical: 10)),
                 new Icon(
-                  Icons.group,
+                  type == 0 ? Icons.group : Icons.content_copy,
                   size: 35,
                   color: Colors.blue[700],
                 ),
@@ -598,27 +599,6 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
               style: TextStyle(color: Colors.grey),
               textAlign: TextAlign.center,
             ),
-            actions: <Widget>[
-              // usually buttons at the bottom of the dialog
-              new FlatButton(
-                child: new Text("Close"),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-    }
-    else {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          // return object of type Dialog
-          return AlertDialog(
-            title: new Text(title),
-            content: new Text(body),
             actions: <Widget>[
               // usually buttons at the bottom of the dialog
               new FlatButton(
@@ -659,6 +639,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
       onTap: () {
         _screens[3] = leaguesFocus(league, leaderboard, testUser);
         _currentIndex = 3;
+        league.updateLeaderboard();
       },
       child: Column(
         children: <Widget>[
@@ -691,7 +672,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     new Text(
-                      currentBucket.getSteps().toString(),
+                      currentLeagueMember.score.toString(),
                       style: TextStyle(fontSize: 30, color:(currentBucket.getSteps() >= league.goal) ? Colors.lightGreenAccent[700] : Colors.blue, fontWeight: FontWeight.bold,),
                     ),
                   ],
@@ -707,7 +688,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                       height: 27,
                       child: Center(
                         child: Text(
-                          ("x2"),
+                          ("x" + currentLeagueMember.multiplierBucket.multiplier.toString()),
                           textAlign: TextAlign.center,
                           style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold,),
                         ),
@@ -967,6 +948,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                             print("--------------");
                             if(newLeague != null) {
                               _showDialog(newLeague.name, "has been created", 0);
+                              updateLeaguesScore(testUser, currentBucket);
                               setState(() {
                                 currentUser.addLeague(newLeague);
                                 print("ADDED!");
@@ -1178,6 +1160,8 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                                 onPressed: () {
                                   ClipboardData data = new ClipboardData(text: league.leagueID);
                                   Clipboard.setData(data);
+                                  _showDialog("Copied", "'"+league.leagueID+"' has been saved to your clipboard.", 1);
+
                                 },
                               )
                             ],
@@ -1261,8 +1245,7 @@ CircularPercentIndicator levelIndicator (User user) {
 
 //TODO : Figure out how we are going to store the steps and goal values
 Widget leagueIndicator(User user, League league, StepBucket currentBucket) {
-  int score = user.getSteps() * 2;
-
+  LeagueMember currentLeagueMember = league.getMember(user.getUserID());
   return new Stack(
     children: <Widget>[
       CircularPercentIndicator(
@@ -1281,7 +1264,7 @@ Widget leagueIndicator(User user, League league, StepBucket currentBucket) {
               style: TextStyle(fontSize: 18, color: Colors.grey.withOpacity(0.5), fontWeight: FontWeight.bold,),
             ),
             new Text(
-              score.toString(),
+              currentLeagueMember.score.toString(),
               style: TextStyle(fontSize: 50, color: (currentBucket.getSteps() >= league.goal) ? Colors.lightGreenAccent[700] : Colors.blue, fontWeight: FontWeight.bold,),
             ),
             new Text(
@@ -1337,7 +1320,7 @@ Widget leagueIndicator(User user, League league, StepBucket currentBucket) {
           height: 40,
           child: Center(
             child: Text(
-              "x2",
+              "x" + currentLeagueMember.multiplier.toString(),
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold,),
             ),
@@ -1535,10 +1518,10 @@ Widget homePage(User user, DateTime today, StepBucket currentBucket, Map<String,
             new Padding(
               padding: EdgeInsets.symmetric(vertical: 5),
             ),
-            new Text(fileContentSaved.toString()),
-            new Text("stepStream : " + debugStepStream.toString()),
-            new Text("offset : " + currentBucket.stepOffset.toString()),
-            new Text(fileContent.toString()),
+//            new Text(fileContentSaved.toString()),
+//            new Text("stepStream : " + debugStepStream.toString()),
+//            new Text("offset : " + currentBucket.stepOffset.toString()),
+//            new Text(fileContent.toString()),
             Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -1802,5 +1785,21 @@ void toggleLeagueOptions() {
 
 void setLogInState(bool state) {
   _isLoggedIn = state;
+}
+
+void updateLeaguesScore(User testUser, StepBucket currentBucket) {
+  testUser.updateUserAsLeagueMembersList();
+  for(int i = 0; i < testUser.usersLeagueMembers.length; i++) {
+    if(currentBucket.getSteps() >= testUser.usersLeagueMembers[i].leagueGoal && !testUser.usersLeagueMembers[i].hasUpdatedToday) {
+      testUser.usersLeagueMembers[i].multiplierBucket.multiplier++;
+      testUser.usersLeagueMembers[i].multiplierBucket.offset = testUser.usersLeagueMembers[i].leagueGoal*(testUser.usersLeagueMembers[i].multiplier-1);
+      testUser.usersLeagueMembers[i].updateScore();
+      testUser.usersLeagueMembers[i].hasUpdatedToday = true;
+    }
+    else {
+      testUser.usersLeagueMembers[i].multiplierBucket.steps = currentBucket.getSteps() - (testUser.usersLeagueMembers[i].leagueGoal*(testUser.usersLeagueMembers[i].multiplierBucket.multiplier-1));
+      testUser.usersLeagueMembers[i].updateScore();
+    }
+  }
 }
 

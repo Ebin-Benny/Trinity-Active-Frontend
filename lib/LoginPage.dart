@@ -8,6 +8,7 @@ import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:http/http.dart' as http;
 import 'Request.dart' as request;
 import 'dart:async';
+import 'StepBucket.dart';
 
 
 class LoginPage extends StatefulWidget {
@@ -61,6 +62,7 @@ class LoginPageState extends State<LoginPage> {
           print("No User Exists!");
           this.loggedInUser = new User.newUser(profileData['id'].toString(), profileData['name'].toString());
           request.Request.postNewUser(this.loggedInUser);
+          request.Request.updateUserSteps(loggedInUser, new StepBucket(0, DateTime.now().day));
           print(this.loggedInUser.userID);
         }
         samplePageState.setUser(loggedInUser);

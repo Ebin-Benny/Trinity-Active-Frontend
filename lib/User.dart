@@ -10,7 +10,7 @@ class User {
   String userID = "";
   int steps = 0;
   int lifetimeSteps = 0;
-  List<History> stepHistory;
+  List<History> stepHistory = new List();
   int personalGoal = 10000;
   int level = 1;
   List<League> leagues = new List();
@@ -109,13 +109,13 @@ class User {
 
   void updateLevel() {
     int i = this.level;
-    print(this.level);
+//    print(this.level);
     while(this.lifetimeSteps > getLevelsStepRequirements(i+1)) {
-      print("checking " + this.lifetimeSteps.toString() + ",  needs : " + getLevelsStepRequirements(i).toString());
+//      print("checking " + this.lifetimeSteps.toString() + ",  needs : " + getLevelsStepRequirements(i).toString());
       i++;
     }
     this.level = i;
-    print(i.toString() + " new level");
+//    print(i.toString() + " new level");
   }
 
   int getLevelsStepRequirements(int level) {
@@ -123,6 +123,7 @@ class User {
   }
 
   double percentToNextLevel() {
+    updateLevel();
     double percent = (this.lifetimeSteps - getLevelsStepRequirements(this.level)) / (getLevelsStepRequirements(this.level+1) - getLevelsStepRequirements(this.level));
     return percent;
 //    return 0.5;

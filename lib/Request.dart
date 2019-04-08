@@ -78,7 +78,7 @@ class Request {
   static Future<String> postNewLeague(League league,LeagueMember member) async{
     //Create a new league with the user in it and returns the leagueId
     String res = "";
-    await http.post(Uri.encodeFull("http://68.183.45.201:3001/createNewLeague?name="+league.name+"&memberId="+member.userId+"&userName="+member.name)).then((result) {
+    await http.post(Uri.encodeFull("http://68.183.45.201:3001/createNewLeague?name="+league.name+"&memberId="+member.userId+"&userName="+member.name+"&goal="+league.goal.toString())).then((result) {
       //handle response code
       if(result.statusCode != 200){
         throw Exception("fail to post info to the server");
@@ -95,7 +95,12 @@ class Request {
     var response = await http.get(uri);
     if(response.statusCode == 200){
       var res = json.decode(response.body)['data'];
-      var league = new League.withID(10000,res['leagueName'],leagueID);
+      var league;
+      if(res['goal'] != null) {
+        league = new League.withID(res['goal'],res['leagueName'],leagueID);
+      } else {
+        league = new League.withID(10000,res['leagueName'],leagueID);
+    }
       var list = new List<dynamic>();
       list = res['members'];
       for(var i=0;i<list.length;i++){
@@ -115,6 +120,14 @@ class Request {
     var result = await http.get(uri);
     if(result.statusCode != 200){
       throw Exception("fail to post info to the server");
+    }
+  }
+
+  static updateGoal(User user) async{
+    var uri = new Uri.http('68.183.45.201:3001','/updateUserGoal/'+user.getUserID(),{"goal" : user.getPersonalGoal().toString()});
+    var result = await http.get(uri);
+    if(result.statusCode != 200){
+      throw Exception("fail to post new goal to the server");
     }
   }
 
@@ -142,6 +155,9 @@ class Request {
           });
 
     }
+    //print(json['data']['goal'] + "|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+    user.setPersonalGoal(json['data']['goal']);
+    user.setLifetimeSteps(json['data']['lifetimeSteps']);
     user.setStepHistory(historyList);
     //user.calculateLifetimeSteps();
     return user;

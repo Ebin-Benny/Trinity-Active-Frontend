@@ -23,6 +23,8 @@ class LeagueMember {
 
   bool isComplete = false;
 
+  bool hasUpdatedToday = false;
+
   MultiplierBucket multiplierBucket;
 
   bool getIsComplete() {
@@ -55,6 +57,14 @@ class LeagueMember {
       this.isComplete = false;
     }
   }
+
+  void updateScore() {
+    for(int i = 0; i < multiplierBucket.multiplier; i++) {
+      score = i * leagueGoal + (multiplierBucket.multiplier * multiplierBucket.steps);
+      print(score.toString() + " " + leagueGoal.toString());
+    }
+  }
+
 
 
 }
