@@ -21,7 +21,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 
-
 const double RADIUS = 250;
 bool isCompleted = false;
 Color blue = Colors.blue;
@@ -31,7 +30,6 @@ int _steps = 0;
 int _multiplier = 1;
 bool showGoalOptions = false;
 bool showLeagueOptions = false;
-int numberOfLevels = 50;
 bool _isLoggedIn = false;
 
 
@@ -178,54 +176,12 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
 
   @override
   Widget build(BuildContext context) {
-    leaderboard = [const ListTile(
-        leading: Text("1."),
-        title: Text('Owen Johnston'),
-        trailing: Text("7500"),
-      ),
-      const ListTile(
-        leading: Text("2."),
-        title: Text(
-          'YOU',
-          style: TextStyle(color: Colors.blue),
-        ),
-        trailing: Text("5132"),
-      ),
-      const ListTile(
-        leading: Text("3."),
-        title: Text('Caolan Wall'),
-        trailing: Text("4789"),
-      ),
-      const ListTile(
-        leading: Text("4."),
-        title: Text('Ebin Benny'),
-        trailing: Text("3467"),
-      ),
-      const ListTile(
-        leading: Text("5."),
-        title: Text('David Scollard'),
-        trailing: Text("2104"),
-      ),
-      const ListTile(
-        leading: Text("6."),
-        title: Text('Baptiste Frere'),
-        trailing: Text("1869"),
-      ),
-      const ListTile(
-        leading: Text("7."),
-        title: Text('John Zhang'),
-        trailing: Text("1045"),
-      )
-    ];
+
     setUpPedometer();
     if(testUser.getStepHistory().isEmpty) {
       testUser.setStepHistory(history);
     }
-    //If the buckets steps are less than the one saved
-//    if(currentBucket.getSteps() < num.parse(fileContent["value"]) && currentBucket.day == num.parse(fileContent["key"])) {
-//      currentBucket.updateSteps(num.parse(fileContent["value"]));
-//      print("ahhh------------------1");
-//    }
+
     Widget home = homePage(testUser, today, currentBucket, fileContent, fileContentSaved,debugStepStream);
     Widget historyScreen = historyPage(testUser);
     Widget leagues = leaguesPage(testUser.leagues);
@@ -235,12 +191,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
     _screens[4] = addLeaguePage(context, setLeagueNameController, setLeagueGoalController, setLeagueDurationController, testUser);
     DrawerCreator drawerCreator = new DrawerCreator(testUser, context);
 
-    timer = timer + 1;
-    //60 FPS AVG
-    if(timer %  3600 == 0) {
-      Request.updateUserSteps(testUser, currentBucket);
-      timer = 0;
-    }
+
 
     return Scaffold(
       drawer: drawerCreator.drawer,
@@ -559,6 +510,14 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
 
   void _onData(int stepCountValue) async {
     setState(() {
+      timer = timer + 1;
+      print(timer);
+      //60 FPS AVG
+      if(timer %  240 == 0) {
+        Request.updateUserSteps(testUser, currentBucket);
+        print("|||||||||||||||||||||||UPDATED STEPS||||||||||||||||||||||||");
+        timer = 0;
+      }
       // TODO: better implementation of the date changing
       DateTime current = new DateTime.now();
       debugStepStream = stepCountValue;
@@ -586,7 +545,6 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
         if(!bucketUpdatedFromFile) {
           if(testUser.getSteps() < currentBucket.getSteps()) {
             currentBucket.updateSteps(currentBucket.getSteps() + testUser.getSteps());
-            print("ahhh------------------2----------------------------------------------------------------------------------------------------");
           }
           else if(isNewDayFromFile) {
             currentBucket.stepOffset = testUser.getSteps();
@@ -594,7 +552,6 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
           }
           else {
             currentBucket.updateSteps(testUser.getSteps());
-            print("ahhh------------------5");
           }
         }
         else if(stepChanged){
@@ -603,7 +560,6 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
             currentBucket.updateSteps(currentBucket.getSteps()-stepCountValue);
             updatedStep = true;
           }
-          print("ahhh------------------6" + bucketUpdatedFromFile.toString());
         }
         //print(currentBucket.toString());
         checkCompletion(currentBucket.getSteps(), testUser.getPersonalGoal());

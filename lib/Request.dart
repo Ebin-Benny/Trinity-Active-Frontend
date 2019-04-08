@@ -143,6 +143,7 @@ class Request {
 
     }
     user.setStepHistory(historyList);
+    //user.calculateLifetimeSteps();
     return user;
   }
 }

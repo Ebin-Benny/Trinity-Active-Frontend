@@ -119,7 +119,7 @@ class User {
   }
 
   int getLevelsStepRequirements(int level) {
-    return level == 1 ? 0 : (15000 + (1000 * (level-1)));
+    return level == 1 ? 0 : (8000 + ( 15000 * (level-1)));
   }
 
   double percentToNextLevel() {
@@ -194,6 +194,12 @@ class User {
   void updateUserAsLeagueMembersSteps(int steps) {
     for(int i = 0; i < this.usersLeagueMembers.length; i++) {
 
+    }
+  }
+
+  void calculateLifetimeSteps() {
+    for (int i = 0; i < this.getStepHistory().length; i++) {
+      this.lifetimeSteps = this.lifetimeSteps + this.getStepHistory()[i].steps;
     }
   }
 }
