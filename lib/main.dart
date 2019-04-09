@@ -330,14 +330,14 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
 //                          hardcodedLeague.updateLeaderboard();
                           if(addLeagueController.text.isNotEmpty) {
                             League league;
-                            Request.addUserToLeague(addLeagueController.text, testUser);
-                            Request.getLeague(addLeagueController.text).then((League returned) {
+                            Request.addUserToLeague(addLeagueController.text, testUser).then((League returned) {
                               league = returned;
+                              print(league);
                               if(league != null) {
 //                                league.addMember(new LeagueMember(testUser.userID, testUser.name, league.leagueID, 1));
                                 bool result = false;
                                 setState(() {
-
+                                  print("added!");
                                   result = testUser.addLeague(league);
                                 });
                                 if(result) {
