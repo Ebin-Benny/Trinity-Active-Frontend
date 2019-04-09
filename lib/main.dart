@@ -466,6 +466,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
     setState(() {
       for(int i = 0; i < testUser.usersLeagueMembers.length; i++) {
         testUser.usersLeagueMembers[i].hasUpdatedToday = false;
+        Request.updateTodays(testUser.usersLeagueMembers[i], false);
       }
       Request.updateUserSteps(testUser, currentBucket);
       testUser.setLifetimeSteps(testUser.getLifetimeSteps() + currentBucket.getSteps());
@@ -1330,7 +1331,7 @@ Widget leagueIndicator(User user, League league, StepBucket currentBucket) {
           height: 40,
           child: Center(
             child: Text(
-              "x" + currentLeagueMember.multiplier.toString(),
+              "x" + currentLeagueMember.multiplierBucket.multiplier.toString(),
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold,),
             ),

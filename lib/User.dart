@@ -1,4 +1,4 @@
-import 'package:TrinityActive/LeagueMember.dart';
+import 'package:circular_indicator_test/LeagueMember.dart';
 
 import 'History.dart';
 import 'package:flutter/material.dart';
@@ -210,12 +210,13 @@ class User {
     this.updateUserAsLeagueMembersList();
     print(currentBucket.getSteps());
     for(int i = 0; i < this.usersLeagueMembers.length; i++) {
+      print("LEAGUE NAME : "+this.usersLeagueMembers[i].leagueID+"      "+this.usersLeagueMembers[i].hasUpdatedToday.toString());
       if(currentBucket.getSteps() >= this.usersLeagueMembers[i].leagueGoal && !this.usersLeagueMembers[i].hasUpdatedToday) {
         this.usersLeagueMembers[i].multiplierBucket.multiplier++;
         this.usersLeagueMembers[i].multiplierBucket.offset = this.usersLeagueMembers[i].leagueGoal*(this.usersLeagueMembers[i].multiplier-1);
         this.usersLeagueMembers[i].updateScore();
         this.usersLeagueMembers[i].hasUpdatedToday = true;
-        //request to put bool=true on DB
+        Request.updateTodays(this.usersLeagueMembers[i], true);
       }
       else {
         this.usersLeagueMembers[i].multiplierBucket.steps = currentBucket.getSteps() - (this.usersLeagueMembers[i].leagueGoal*(this.usersLeagueMembers[i].multiplierBucket.multiplier-1));
