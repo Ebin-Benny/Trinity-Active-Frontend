@@ -215,6 +215,7 @@ class User {
         this.usersLeagueMembers[i].multiplierBucket.offset = this.usersLeagueMembers[i].leagueGoal*(this.usersLeagueMembers[i].multiplier-1);
         this.usersLeagueMembers[i].updateScore();
         this.usersLeagueMembers[i].hasUpdatedToday = true;
+        //request to put bool=true on DB
       }
       else {
         this.usersLeagueMembers[i].multiplierBucket.steps = currentBucket.getSteps() - (this.usersLeagueMembers[i].leagueGoal*(this.usersLeagueMembers[i].multiplierBucket.multiplier-1));
