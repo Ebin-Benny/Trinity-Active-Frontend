@@ -58,6 +58,15 @@ class Request {
     });
   }
 
+  static updateScore(LeagueMember member){
+    http.patch(Uri.encodeFull("68.183.45.201:3001/updateUserScore/"+member.userId+"?leagueId="+member.leagueID+"&score="+member.score.toString())).then((result) {
+      //handle response code
+      if(result.statusCode != 200){
+        throw Exception("fail to update score to the server");
+      }
+    });
+
+  }
 
   //We need a request to updateLeagueMember(LeagueMember member, League league) {
 
@@ -70,7 +79,7 @@ class Request {
     http.patch(Uri.encodeFull("http://68.183.45.201:3001/addLeagueMember?leagueId="+leagueID+"&memberId="+user.getUserID()+"&userName="+user.getName())).then((result) {
       //handle response code
       if(result.statusCode != 200){
-        throw Exception("fail to patch info to the server");
+        throw Exception("fail to add league user to the server");
       }
     });
   }
