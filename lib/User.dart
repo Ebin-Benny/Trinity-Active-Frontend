@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'League.dart';
 import 'package:random_string/random_string.dart';
 import 'StepBucket.dart';
+import 'Request.dart';
 
 class User {
   String name = "";
@@ -218,6 +219,7 @@ class User {
         this.usersLeagueMembers[i].multiplierBucket.steps = currentBucket.getSteps() - (this.usersLeagueMembers[i].leagueGoal*(this.usersLeagueMembers[i].multiplierBucket.multiplier-1));
         this.usersLeagueMembers[i].updateScore();
       }
+      Request.updateScore(this.usersLeagueMembers[i]);
     }
   }
 }

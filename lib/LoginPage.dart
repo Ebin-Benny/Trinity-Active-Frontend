@@ -55,7 +55,7 @@ class LoginPageState extends State<LoginPage> {
           this.loggedInUser = new User.newUser(profileData['id'].toString(), profileData['name'].toString());
           print(this.loggedInUser.userID);
           this.loggedInUser = await request.Request.getUserHomepage(this.loggedInUser);
-          print(this.loggedInUser.getStepHistory()[0].getSteps());
+         // print(this.loggedInUser.getStepHistory()[0].getSteps());
           this.loggedInUser.updateCardHistory();
         }
         else {

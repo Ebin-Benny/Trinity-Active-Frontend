@@ -58,7 +58,7 @@ class Request {
     });
   }
 
-  static updateScore(LeagueMember member){
+  static updateScore(LeagueMember member) async{
     http.patch(Uri.encodeFull("68.183.45.201:3001/updateUserScore/"+member.userId+"?leagueId="+member.leagueID+"&score="+member.score.toString())).then((result) {
       //handle response code
       if(result.statusCode != 200){
@@ -74,12 +74,15 @@ class Request {
 
   //}
 
-  static addUserToLeague(String leagueID,User user) async{
+  static Future<League> addUserToLeague(String leagueID,User user) async{
     //Takes an existing leagueID and add the user to the league corresponding
     http.patch(Uri.encodeFull("http://68.183.45.201:3001/addLeagueMember?leagueId="+leagueID+"&memberId="+user.getUserID()+"&userName="+user.getName())).then((result) {
       //handle response code
       if(result.statusCode != 200){
         throw Exception("fail to add league user to the server");
+      }
+      else {
+        return true;
       }
     });
   }
