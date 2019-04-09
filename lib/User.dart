@@ -4,6 +4,7 @@ import 'History.dart';
 import 'package:flutter/material.dart';
 import 'League.dart';
 import 'package:random_string/random_string.dart';
+import 'StepBucket.dart';
 
 class User {
   String name = "";
@@ -201,6 +202,22 @@ class User {
   void calculateLifetimeSteps() {
     for (int i = 0; i < this.getStepHistory().length; i++) {
       this.lifetimeSteps = this.lifetimeSteps + this.getStepHistory()[i].steps;
+    }
+  }
+
+  void updateLeaguesScore(StepBucket currentBucket) {
+    this.updateUserAsLeagueMembersList();
+    for(int i = 0; i < this.usersLeagueMembers.length; i++) {
+      if(currentBucket.getSteps() >= this.usersLeagueMembers[i].leagueGoal && !this.usersLeagueMembers[i].hasUpdatedToday) {
+        this.usersLeagueMembers[i].multiplierBucket.multiplier++;
+        this.usersLeagueMembers[i].multiplierBucket.offset = this.usersLeagueMembers[i].leagueGoal*(this.usersLeagueMembers[i].multiplier-1);
+        this.usersLeagueMembers[i].updateScore();
+        this.usersLeagueMembers[i].hasUpdatedToday = true;
+      }
+      else {
+        this.usersLeagueMembers[i].multiplierBucket.steps = currentBucket.getSteps() - (this.usersLeagueMembers[i].leagueGoal*(this.usersLeagueMembers[i].multiplierBucket.multiplier-1));
+        this.usersLeagueMembers[i].updateScore();
+      }
     }
   }
 }

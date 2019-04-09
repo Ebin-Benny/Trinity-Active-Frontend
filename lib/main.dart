@@ -84,6 +84,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
           currentBucket.updateSteps(num.parse(fileContent["value"]));
           print(fileContent["value"] + "----------------------------------------------------------");
           bucketUpdatedFromFile = true;
+          testUser.updateLeaguesScore(currentBucket);
         }
         else {
           isNewDayFromFile = true;
@@ -341,7 +342,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                                 });
                                 if(result) {
                                   _showDialog(league.name.toString(), "has been added.", 0);
-                                  updateLeaguesScore(testUser, currentBucket);
+                                  testUser.updateLeaguesScore(currentBucket);
                                 }
                                 else {
                                   _showDialog(league.name.toString(), "has already been added", 0);
@@ -397,8 +398,8 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                       IconButton(
                         icon: Icon(Icons.close),
                         onPressed: () {
-                          toggleGoalOptions;
-                          },
+                          toggleGoalOptions();
+                        },
                       )
                     ],
                   ),
@@ -512,7 +513,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
         print("|||||||||||||||||||||||UPDATED STEPS||||||||||||||||||||||||");
         timer = 0;
 
-        updateLeaguesScore(testUser, currentBucket);
+        testUser.updateLeaguesScore(currentBucket);
       }
 
       // TODO: better implementation of the date changing
@@ -639,7 +640,9 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
       onTap: () {
         _screens[3] = leaguesFocus(league, leaderboard, testUser);
         _currentIndex = 3;
-        league.updateLeaderboard();
+        setState(() {
+          league.updateLeaderboard();
+        });
       },
       child: Column(
         children: <Widget>[
@@ -948,7 +951,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                             print("--------------");
                             if(newLeague != null) {
                               _showDialog(newLeague.name, "has been created", 0);
-                              updateLeaguesScore(testUser, currentBucket);
+                              testUser.updateLeaguesScore(currentBucket);
                               setState(() {
                                 currentUser.addLeague(newLeague);
                                 print("ADDED!");
@@ -1787,19 +1790,5 @@ void setLogInState(bool state) {
   _isLoggedIn = state;
 }
 
-void updateLeaguesScore(User testUser, StepBucket currentBucket) {
-  testUser.updateUserAsLeagueMembersList();
-  for(int i = 0; i < testUser.usersLeagueMembers.length; i++) {
-    if(currentBucket.getSteps() >= testUser.usersLeagueMembers[i].leagueGoal && !testUser.usersLeagueMembers[i].hasUpdatedToday) {
-      testUser.usersLeagueMembers[i].multiplierBucket.multiplier++;
-      testUser.usersLeagueMembers[i].multiplierBucket.offset = testUser.usersLeagueMembers[i].leagueGoal*(testUser.usersLeagueMembers[i].multiplier-1);
-      testUser.usersLeagueMembers[i].updateScore();
-      testUser.usersLeagueMembers[i].hasUpdatedToday = true;
-    }
-    else {
-      testUser.usersLeagueMembers[i].multiplierBucket.steps = currentBucket.getSteps() - (testUser.usersLeagueMembers[i].leagueGoal*(testUser.usersLeagueMembers[i].multiplierBucket.multiplier-1));
-      testUser.usersLeagueMembers[i].updateScore();
-    }
-  }
-}
+
 
