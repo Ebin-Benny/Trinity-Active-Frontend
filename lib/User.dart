@@ -208,6 +208,7 @@ class User {
 
   void updateLeaguesScore(StepBucket currentBucket) {
     this.updateUserAsLeagueMembersList();
+    print(currentBucket.getSteps());
     for(int i = 0; i < this.usersLeagueMembers.length; i++) {
       if(currentBucket.getSteps() >= this.usersLeagueMembers[i].leagueGoal && !this.usersLeagueMembers[i].hasUpdatedToday) {
         this.usersLeagueMembers[i].multiplierBucket.multiplier++;

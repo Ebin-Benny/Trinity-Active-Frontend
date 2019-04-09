@@ -59,7 +59,7 @@ class Request {
   }
 
   static updateScore(LeagueMember member) async{
-    http.patch(Uri.encodeFull("68.183.45.201:3001/updateUserScore/"+member.userId+"?leagueId="+member.leagueID+"&score="+member.score.toString())).then((result) {
+    http.patch(Uri.encodeFull("68.183.45.201:3001/updateUserScore/"+member.userId+"?leagueId="+member.leagueID+"&score="+member.score.toString()+"&multi="+member.multiplierBucket.multiplier.toString())).then((result) {
       //handle response code
       if(result.statusCode != 200){
         throw Exception("fail to update score to the server");
@@ -74,7 +74,7 @@ class Request {
 
   //}
 
-  static Future<League> addUserToLeague(String leagueID,User user) async{
+  static addUserToLeague(String leagueID,User user) async{
     //Takes an existing leagueID and add the user to the league corresponding
     http.patch(Uri.encodeFull("http://68.183.45.201:3001/addLeagueMember?leagueId="+leagueID+"&memberId="+user.getUserID()+"&userName="+user.getName())).then((result) {
       //handle response code
@@ -116,7 +116,10 @@ class Request {
       var list = new List<dynamic>();
       list = res['members'];
       for(var i=0;i<list.length;i++){
-        league.addMember(new LeagueMember(list[i]['memberId'], list[i]['name'], list[i]['leagueId'], list[i]['score']));
+        LeagueMember newMember = new LeagueMember(list[i]['memberId'], list[i]['name'], list[i]['leagueId'], list[i]['score']);
+        newMember.multiplierBucket.multiplier = list[i]['multiplier'];
+        league.addMember(newMember);
+
       }
       print(league.leagueID);
       return league;

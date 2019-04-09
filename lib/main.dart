@@ -506,65 +506,72 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
 
   void _onData(int stepCountValue) async {
     setState(() {
-      //60 FPS AVG
-      timer = timer + 1;
-      if(timer %  1800 == 0) {
-        Request.updateUserSteps(testUser, currentBucket);
-        print("|||||||||||||||||||||||UPDATED STEPS||||||||||||||||||||||||");
-        timer = 0;
-
-        testUser.updateLeaguesScore(currentBucket);
-      }
-
-      // TODO: better implementation of the date changing
-      DateTime current = new DateTime.now();
-      debugStepStream = stepCountValue;
-      int stepOffset;
-      int previousStepCountValue;
-      bool stepChanged = false;
-      if(current.day != today.day) {
-        today = current;
-        newDay();
+      if(currentBucket.getSteps() < 0) {
+        currentBucket.stepOffset = 0;
+        currentBucket.updateSteps(0);
       }
       else {
-        if(testUser.getSteps() != stepCountValue) {
-          stepChanged = true;
+        timer = timer + 1;
+        if(timer %  1800 == 0) {
+          Request.updateUserSteps(testUser, currentBucket);
+          print("|||||||||||||||||||||||UPDATED STEPS||||||||||||||||||||||||");
+          timer = 0;
+
+          testUser.updateLeaguesScore(currentBucket);
+        }
+
+        // TODO: better implementation of the date changing
+        DateTime current = new DateTime.now();
+        debugStepStream = stepCountValue;
+        int stepOffset;
+        int previousStepCountValue;
+        bool stepChanged = false;
+        if(current.day != today.day) {
+          today = current;
+          newDay();
         }
         else {
-          stepChanged = false;
-        }
-        previousStepCountValue = testUser.getSteps();
-        testUser.setSteps(stepCountValue /*- testUser.getLifetimeSteps()*/);
-
-        steps = stepCountValue;
-        //checks if the
-        writeToFile(currentBucket.day.toString(),currentBucket.getSteps().toString());
-        //print(fileContent.toString());
-        if(!bucketUpdatedFromFile) {
-          if(testUser.getSteps() < currentBucket.getSteps()) {
-            currentBucket.updateSteps(currentBucket.getSteps() + testUser.getSteps());
-          }
-          else if(isNewDayFromFile) {
-            currentBucket.stepOffset = testUser.getSteps();
-            isNewDayFromFile = false;
+          if(testUser.getSteps() != stepCountValue) {
+            stepChanged = true;
           }
           else {
-            currentBucket.updateSteps(testUser.getSteps());
+            stepChanged = false;
           }
-        }
-        else if(stepChanged){
-          currentBucket.updateSteps(currentBucket.getSteps() + (testUser.getSteps() - previousStepCountValue));
-          if(stepCountValue != 0 && !updatedStep) {
-            currentBucket.updateSteps(currentBucket.getSteps()-stepCountValue);
-            updatedStep = true;
+          previousStepCountValue = testUser.getSteps();
+          testUser.setSteps(stepCountValue /*- testUser.getLifetimeSteps()*/);
+
+          steps = stepCountValue;
+          //checks if the
+          writeToFile(currentBucket.day.toString(),currentBucket.getSteps().toString());
+          //print(fileContent.toString());
+          if(!bucketUpdatedFromFile) {
+            if(testUser.getSteps() < currentBucket.getSteps()) {
+              currentBucket.updateSteps(currentBucket.getSteps() + testUser.getSteps());
+            }
+            else if(isNewDayFromFile) {
+              currentBucket.stepOffset = testUser.getSteps();
+              isNewDayFromFile = false;
+            }
+            else {
+              currentBucket.updateSteps(testUser.getSteps());
+            }
           }
+          else if(stepChanged){
+            currentBucket.updateSteps(currentBucket.getSteps() + (testUser.getSteps() - previousStepCountValue));
+            if(stepCountValue != 0 && !updatedStep) {
+              currentBucket.updateSteps(currentBucket.getSteps()-stepCountValue);
+              updatedStep = true;
+            }
+          }
+          //print(currentBucket.toString());
+          checkCompletion(currentBucket.getSteps(), testUser.getPersonalGoal());
         }
-        //print(currentBucket.toString());
-        checkCompletion(currentBucket.getSteps(), testUser.getPersonalGoal());
+
+
+
+
       }
-
-
-
+      //60 FPS AVG
 
     });
   }
