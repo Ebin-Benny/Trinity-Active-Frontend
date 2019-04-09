@@ -81,9 +81,7 @@ class Request {
       if(result.statusCode != 200){
         throw Exception("fail to add league user to the server");
       }
-      else {
-        return true;
-      }
+      return _createLeague(json.decode(result.body));
     });
   }
 
@@ -106,20 +104,7 @@ class Request {
     var uri = new Uri.http('68.183.45.201:3001','getLeague/'+leagueID);
     var response = await http.get(uri);
     if(response.statusCode == 200){
-      var res = json.decode(response.body)['data'];
-      var league;
-      if(res['goal'] != null) {
-        league = new League.withID(res['goal'],res['leagueName'],leagueID);
-      } else {
-        league = new League.withID(10000,res['leagueName'],leagueID);
-    }
-      var list = new List<dynamic>();
-      list = res['members'];
-      for(var i=0;i<list.length;i++){
-        league.addMember(new LeagueMember(list[i]['memberId'], list[i]['name'], list[i]['leagueId'], list[i]['score']));
-      }
-      print(league.leagueID);
-      return league;
+      return _createLeague(json.decode(response.body));
     }
     else{
       throw Exception('failed to get league from the server');
@@ -141,6 +126,23 @@ class Request {
     if(result.statusCode != 200){
       throw Exception("fail to post new goal to the server");
     }
+  }
+
+  static League _createLeague(Map<String, dynamic> value){
+    var res = value['data'];
+    var league;
+    if(res['goal'] != null) {
+      league = new League.withID(res['goal'],res['leagueName'],res['leagueId']);
+    } else {
+      league = new League.withID(10000,res['leagueName'],res['leagueId']);
+    }
+    var list = new List<dynamic>();
+    list = res['members'];
+    for(var i=0;i<list.length;i++){
+      league.addMember(new LeagueMember(list[i]['memberId'], list[i]['name'], list[i]['leagueId'], list[i]['score']));
+    }
+    print(league.leagueID);
+    return league;
   }
 
   static _updateUserFromJSon(Map<String, dynamic> json,User user){
