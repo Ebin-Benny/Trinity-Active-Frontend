@@ -1,4 +1,4 @@
-name: circular_indicator_test
+name: TrinityActive
 description: A new Flutter application.
 
 # The following defines the version and build number for your application.
@@ -34,6 +34,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: "^0.7.0"
 
 
 # For information on the generic Dart part of this file, see the
@@ -50,6 +51,11 @@ flutter:
     - images/bullseye-arrow.png
     - images/TrinityActive-logo.png
     - images/trinity-logo.png
+
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "images/TrinityActive-logo.png"
 
 
   # The following line ensures that the Material Icons font is

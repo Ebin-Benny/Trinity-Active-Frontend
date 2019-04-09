@@ -1,4 +1,4 @@
-import 'package:circular_indicator_test/LeagueMember.dart';
+import 'package:TrinityActive/LeagueMember.dart';
 
 import 'History.dart';
 import 'package:flutter/material.dart';
