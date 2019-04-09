@@ -58,7 +58,7 @@ class Request {
     });
   }
 
-  static updateScore(LeagueMember member) async{
+  static updateScore(LeagueMember member){
     http.patch(Uri.encodeFull("68.183.45.201:3001/updateUserScore/"+member.userId+"?leagueId="+member.leagueID+"&score="+member.score.toString())).then((result) {
       //handle response code
       if(result.statusCode != 200){
@@ -74,14 +74,12 @@ class Request {
 
   //}
 
-  static Future<League> addUserToLeague(String leagueID,User user) async{
+  static addUserToLeague(String leagueID,User user) async{
     //Takes an existing leagueID and add the user to the league corresponding
     http.patch(Uri.encodeFull("http://68.183.45.201:3001/addLeagueMember?leagueId="+leagueID+"&memberId="+user.getUserID()+"&userName="+user.getName())).then((result) {
       //handle response code
       if(result.statusCode != 200){
         throw Exception("fail to add league user to the server");
-      }else{
-        return _createLeague(result.body);
       }
     });
   }
@@ -105,7 +103,20 @@ class Request {
     var uri = new Uri.http('68.183.45.201:3001','getLeague/'+leagueID);
     var response = await http.get(uri);
     if(response.statusCode == 200){
-      return _createLeague(response.body);
+      var res = json.decode(response.body)['data'];
+      var league;
+      if(res['goal'] != null) {
+        league = new League.withID(res['goal'],res['leagueName'],leagueID);
+      } else {
+        league = new League.withID(10000,res['leagueName'],leagueID);
+    }
+      var list = new List<dynamic>();
+      list = res['members'];
+      for(var i=0;i<list.length;i++){
+        league.addMember(new LeagueMember(list[i]['memberId'], list[i]['name'], list[i]['leagueId'], list[i]['score']));
+      }
+      print(league.leagueID);
+      return league;
     }
     else{
       throw Exception('failed to get league from the server');
@@ -127,23 +138,6 @@ class Request {
     if(result.statusCode != 200){
       throw Exception("fail to post new goal to the server");
     }
-  }
-
-  static _createLeague(String val){
-    var res = json.decode(val)['data'];
-    var league;
-    if(res['goal'] != null) {
-      league = new League.withID(res['goal'],res['leagueName'],res['leagueID']);
-    } else {
-      league = new League.withID(10000,res['leagueName'],res['leagueID']);
-    }
-    var list = new List<dynamic>();
-    list = res['members'];
-    for(var i=0;i<list.length;i++){
-      league.addMember(new LeagueMember(list[i]['memberId'], list[i]['name'], list[i]['leagueId'], list[i]['score']));
-    }
-    print(league.leagueID);
-    return league;
   }
 
   static _updateUserFromJSon(Map<String, dynamic> json,User user){
@@ -177,5 +171,4 @@ class Request {
     //user.calculateLifetimeSteps();
     return user;
   }
-
 }
