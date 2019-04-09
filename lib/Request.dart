@@ -59,7 +59,7 @@ class Request {
   }
 
   static updateScore(LeagueMember member) async{
-    http.patch(Uri.encodeFull("68.183.45.201:3001/updateUserScore/"+member.userId+"?leagueId="+member.leagueID+"&score="+member.score.toString()+"&multi="+member.multiplierBucket.multiplier.toString())).then((result) {
+    http.patch(Uri.encodeFull("http://68.183.45.201:3001/updateUserScore/"+member.userId+"?leagueId="+member.leagueID+"&score="+member.score.toString()+"&multi="+member.multiplierBucket.multiplier.toString())).then((result) {
       //handle response code
       if(result.statusCode != 200){
         throw Exception("fail to update score to the server");
@@ -74,14 +74,16 @@ class Request {
 
   //}
 
-  static addUserToLeague(String leagueID,User user) async{
+  static Future<League> addUserToLeague(String leagueID,User user) async{
     //Takes an existing leagueID and add the user to the league corresponding
-    http.patch(Uri.encodeFull("http://68.183.45.201:3001/addLeagueMember?leagueId="+leagueID+"&memberId="+user.getUserID()+"&userName="+user.getName())).then((result) {
+    await http.patch(Uri.encodeFull("http://68.183.45.201:3001/addLeagueMember?leagueId="+leagueID+"&memberId="+user.getUserID()+"&userName="+user.getName())).then((result) {
       //handle response code
       if(result.statusCode != 200){
         throw Exception("fail to add league user to the server");
       }
-      return _createLeague(json.decode(result.body));
+      print(json.decode(result.body));
+      League l = _createLeague(json.decode(result.body));
+      return l;
     });
   }
 
@@ -131,15 +133,18 @@ class Request {
   static League _createLeague(Map<String, dynamic> value){
     var res = value['data'];
     var league;
+    String leagueId;
     if(res['goal'] != null) {
+      leagueId = res['leagueId'];
       league = new League.withID(res['goal'],res['leagueName'],res['leagueId']);
     } else {
+      leagueId = res['leagueId'];
       league = new League.withID(10000,res['leagueName'],res['leagueId']);
     }
     var list = new List<dynamic>();
     list = res['members'];
     for(var i=0;i<list.length;i++){
-      LeagueMember newMember = new LeagueMember(list[i]['memberId'], list[i]['name'], list[i]['leagueId'], list[i]['score']);
+      LeagueMember newMember = new LeagueMember(list[i]['memberId'], list[i]['name'], leagueId, list[i]['score']);
       newMember.multiplierBucket.multiplier = list[i]['multiplier'];
       league.addMember(newMember);
     }

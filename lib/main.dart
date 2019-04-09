@@ -330,9 +330,9 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
 //                          hardcodedLeague.updateLeaderboard();
                           if(addLeagueController.text.isNotEmpty) {
                             League league;
-                            Request.addUserToLeague(addLeagueController.text, testUser).then((League returned) {
-                              league = returned;
-                              print(league);
+                            Request.addUserToLeague(addLeagueController.text, testUser).then((League res) {
+                              league = res;
+                              print("league : " + league.leagueID.toString());
                               if(league != null) {
 //                                league.addMember(new LeagueMember(testUser.userID, testUser.name, league.leagueID, 1));
                                 bool result = false;
@@ -342,7 +342,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                                 });
                                 if(result) {
                                   _showDialog(league.name.toString(), "has been added.", 0);
-                                  testUser.updateLeaguesScore(currentBucket);
+                                  //testUser.updateLeaguesScore(currentBucket);
                                 }
                                 else {
                                   _showDialog(league.name.toString(), "has already been added", 0);
