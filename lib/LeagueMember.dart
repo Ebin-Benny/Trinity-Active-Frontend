@@ -65,6 +65,10 @@ class LeagueMember {
     }
   }
 
+  void setHasUpdatedToday(bool hasUpdatedToday){
+    this.hasUpdatedToday=hasUpdatedToday;
+  }
+
 
 
 }
