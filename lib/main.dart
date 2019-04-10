@@ -331,6 +331,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                           if(addLeagueController.text.isNotEmpty) {
                             League league;
                             Request.addUserToLeague(addLeagueController.text, testUser).then((League res) {
+                              print("RESULT =" + res.toString());
                               league = res;
                               print("league : " + league.leagueID.toString());
                               if(league != null) {
@@ -506,11 +507,6 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
 
   void _onData(int stepCountValue) async {
     setState(() {
-      if(currentBucket.getSteps() < 0) {
-        currentBucket.stepOffset = 0;
-        currentBucket.updateSteps(0);
-      }
-      else {
         timer = timer + 1;
         if(timer %  1800 == 0) {
           Request.updateUserSteps(testUser, currentBucket);
@@ -566,11 +562,6 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
           //print(currentBucket.toString());
           checkCompletion(currentBucket.getSteps(), testUser.getPersonalGoal());
         }
-
-
-
-
-      }
       //60 FPS AVG
 
     });
@@ -681,6 +672,10 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                 center: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
+                    new Text(
+                      "SCORE",
+                      style: TextStyle(fontSize: 15, color: Colors.grey.withOpacity(0.5), fontWeight: FontWeight.bold,),
+                    ),
                     new Text(
                       currentLeagueMember.score.toString(),
                       style: TextStyle(fontSize: 30, color:(currentBucket.getSteps() >= league.goal) ? Colors.lightGreenAccent[700] : Colors.blue, fontWeight: FontWeight.bold,),
@@ -1781,6 +1776,7 @@ void toggleGoalOptions() {
   }
 
 }
+
 void toggleLeagueOptions() {
   if(showLeagueOptions) {
     showLeagueOptions = false;

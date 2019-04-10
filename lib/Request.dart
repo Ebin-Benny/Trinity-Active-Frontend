@@ -76,15 +76,18 @@ class Request {
 
   static Future<League> addUserToLeague(String leagueID,User user) async{
     //Takes an existing leagueID and add the user to the league corresponding
+    League l;
     await http.patch(Uri.encodeFull("http://68.183.45.201:3001/addLeagueMember?leagueId="+leagueID+"&memberId="+user.getUserID()+"&userName="+user.getName())).then((result) {
       //handle response code
       if(result.statusCode != 200){
         throw Exception("fail to add league user to the server");
       }
       print(json.decode(result.body));
-      League l = _createLeague(json.decode(result.body));
-      return l;
+      l = _createLeague(json.decode(result.body));
+      print("||||||||||||||||||||||||||||||||||||||" + l.toString() + "||||||||||||||||||||||||||||||||||||||");
+
     });
+    return l;
   }
 
   static Future<String> postNewLeague(League league,LeagueMember member) async{
