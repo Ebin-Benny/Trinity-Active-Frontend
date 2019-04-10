@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:circular_indicator_test/MultiplierBucket.dart';
 import 'package:http/http.dart' as http;
 import 'User.dart';
 import 'dart:convert';
@@ -58,13 +59,18 @@ class Request {
     });
   }
 
-  static updateScore(LeagueMember member) async{
-    http.patch(Uri.encodeFull("http://68.183.45.201:3001/updateUserScore/"+member.userId+"?leagueId="+member.leagueID+"&score="+member.score.toString()+"&multi="+member.multiplierBucket.multiplier.toString())).then((result) {
+  static Future<MultiplierBucket> updateScore(LeagueMember member) async{
+    MultiplierBucket bucket;
+    await http.patch(Uri.encodeFull("http://68.183.45.201:3001/updateUserScore/"+member.userId+"?leagueId="+member.leagueID)).then((result) {
       //handle response code
       if(result.statusCode != 200){
         throw Exception("fail to update score to the server");
       }
+      print(json.decode(result.body));
+      bucket = new MultiplierBucket(json.decode(result.body)['data']['multiplier'], json.decode(result.body)['data']['score']);
     });
+    print(bucket.score.toString() + "   " + bucket.multiplier.toString());
+    return bucket;
 
   }
 

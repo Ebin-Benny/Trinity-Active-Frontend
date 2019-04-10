@@ -178,6 +178,9 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
   @override
   Widget build(BuildContext context) {
 
+
+
+
     setUpPedometer();
     if(testUser.getStepHistory().isEmpty) {
       testUser.setStepHistory(history);
@@ -342,11 +345,11 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                                   result = testUser.addLeague(league);
                                 });
                                 if(result) {
-                                  _showDialog(league.name.toString(), "has been added.", 0);
+                                  showDialogs(league.name.toString(), "has been added.", 0);
                                   //testUser.updateLeaguesScore(currentBucket);
                                 }
                                 else {
-                                  _showDialog(league.name.toString(), "has already been added", 0);
+                                  showDialogs(league.name.toString(), "has already been added", 0);
                                 }
                               }
                             });
@@ -435,6 +438,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                         child: Icon(Icons.check),
                         onPressed: () {
                           toggleGoalOptions();
+
                           setGoal(num.parse(textController.text));
                           Request.updateGoal(testUser);
                         },
@@ -508,15 +512,14 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
 
   void _onData(int stepCountValue) async {
     setState(() {
-        timer = timer + 1;
+
         if(timer %  1800 == 0) {
           Request.updateUserSteps(testUser, currentBucket);
           print("|||||||||||||||||||||||UPDATED STEPS||||||||||||||||||||||||");
           timer = 0;
-
           testUser.updateLeaguesScore(currentBucket);
         }
-
+        timer = timer + 1;
         // TODO: better implementation of the date changing
         DateTime current = new DateTime.now();
         debugStepStream = stepCountValue;
@@ -573,7 +576,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
 
   void _onCancel() => _subscription.cancel();
 
-  void _showDialog(String title, String body, int type) {
+  void showDialogs(String title, String body, int type) {
     if(type == 0 || type == 1) {
       showDialog(
         context: context,
@@ -608,6 +611,95 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                 },
               ),
             ],
+          );
+        },
+      );
+    }
+    else if(type == 1) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: Stack(
+              alignment: Alignment.center,
+              children: <Widget>[
+                Container(
+                  constraints: BoxConstraints.expand(height: 400, width: 300),
+                  decoration: new BoxDecoration(
+                    color: Colors.white,
+                    border: new Border.all(
+                      color: Colors.white,
+                      width: 5,
+                      style: BorderStyle.solid,
+                    ),
+                    borderRadius: new BorderRadius.all(
+                      new Radius.circular(5),
+                    ),
+                    boxShadow: <BoxShadow>[
+                      BoxShadow(
+                        color: Colors.grey,
+                        offset: Offset(1.0, 6.0),
+                        blurRadius: 40.0,
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: <Widget>[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: <Widget>[
+                          IconButton(
+                            icon: Icon(Icons.close),
+                            onPressed: () {
+                              toggleGoalOptions();
+                            },
+                          )
+                        ],
+                      ),
+                      Image.asset(
+                        "images/goal_image.png",
+                      ),
+                      new Padding(padding: EdgeInsets.symmetric(vertical: 10)),
+                      new Text(
+                        "SET GOAL",
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: Colors.grey.withOpacity(1)),
+
+                      ),
+                      new Padding(padding: EdgeInsets.symmetric(vertical: 10)),
+                      Container(
+                        width: 200,
+                        child: new TextField(
+                          controller: textController,
+                          keyboardType: TextInputType.number,
+                          textAlign: TextAlign.center,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.grey.withOpacity(0.1),
+                            hintText: goal.toString(),
+                          ),
+                        ),
+                      ),
+                      new Padding(padding: EdgeInsets.symmetric(vertical: 35)),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: <Widget>[
+                          FloatingActionButton(
+                            child: Icon(Icons.check),
+                            onPressed: () {
+                              toggleGoalOptions();
+
+                              setGoal(num.parse(textController.text));
+                              Request.updateGoal(testUser);
+                            },
+                          ),
+                        ],
+                      )
+
+                    ],
+                  ),
+                ),
+              ],
+            ),
           );
         },
       );
@@ -953,7 +1045,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                             print(newLeague.members[0].name);
                             print("--------------");
                             if(newLeague != null) {
-                              _showDialog(newLeague.name, "has been created", 0);
+                              showDialogs(newLeague.name, "has been created", 0);
                               testUser.updateLeaguesScore(currentBucket);
                               setState(() {
                                 currentUser.addLeague(newLeague);
@@ -962,6 +1054,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                             }
                           });
                         });
+                        testUser.updateLeaguesScore(currentBucket);
                         print(currentUser.leagues.length);
 
 
@@ -1166,7 +1259,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
                                 onPressed: () {
                                   ClipboardData data = new ClipboardData(text: league.leagueID);
                                   Clipboard.setData(data);
-                                  _showDialog("Copied", "'"+league.leagueID+"' has been saved to your clipboard.", 1);
+                                  showDialogs("Copied", "'"+league.leagueID+"' has been saved to your clipboard.", 1);
 
                                 },
                               )
@@ -1347,7 +1440,7 @@ CircularPercentIndicator homeIndicator(User user, StepBucket currentBucket) {
       radius: RADIUS,
       lineWidth: 15,
       animation: true,
-      percent: currentBucket.getSteps() < user.getPersonalGoal() ? currentBucket.getSteps() / user.getPersonalGoal() : 1,
+      percent: currentBucket.getSteps() <= user.getPersonalGoal() ? currentBucket.getSteps() / user.getPersonalGoal() : 1,
       center: Column(
         children: <Widget>[
           new Padding(

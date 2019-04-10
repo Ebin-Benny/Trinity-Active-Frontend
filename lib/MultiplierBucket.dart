@@ -1,11 +1,10 @@
 class MultiplierBucket {
   int multiplier;
-  int steps;
-  int offset;
+  int score;
 
-  MultiplierBucket(int multiplier, int steps) {
+  MultiplierBucket(int multiplier, int score) {
     this.multiplier = multiplier;
-    this.steps = steps;
+    this.score = score;
   }
 
 }

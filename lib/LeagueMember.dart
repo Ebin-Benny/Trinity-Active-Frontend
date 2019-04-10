@@ -1,3 +1,5 @@
+import 'package:circular_indicator_test/StepBucket.dart';
+
 import 'User.dart';
 import 'MultiplierBucket.dart';
 class LeagueMember {
@@ -16,6 +18,8 @@ class LeagueMember {
   //Users score in the league
   int score = 0;
 
+  int scoreFromDB = 0;
+
   //Users multiplier in the league
   int multiplier = 1;
 
@@ -27,6 +31,8 @@ class LeagueMember {
 
   MultiplierBucket multiplierBucket;
 
+  int stepsSinceMultiplierChange = 0;
+
   bool getIsComplete() {
     return this.isComplete;
   }
@@ -37,6 +43,7 @@ class LeagueMember {
     this.score = score;
     this.name = name;
     this.multiplierBucket = new MultiplierBucket(multiplier, steps);
+    this.scoreFromDB = score;
   }
 
   LeagueMember.leagueless (String userID, String name, int score) {
@@ -58,12 +65,6 @@ class LeagueMember {
     }
   }
 
-  void updateScore() {
-    for(int i = 0; i < multiplierBucket.multiplier; i++) {
-      score = i * leagueGoal + (multiplierBucket.multiplier * multiplierBucket.steps);
-      print(score.toString() + " " + leagueGoal.toString());
-    }
-  }
 
   void setHasUpdatedToday(bool hasUpdatedToday){
     this.hasUpdatedToday=hasUpdatedToday;

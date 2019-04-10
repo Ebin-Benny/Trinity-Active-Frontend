@@ -1,4 +1,5 @@
 import 'package:circular_indicator_test/LeagueMember.dart';
+import 'package:circular_indicator_test/MultiplierBucket.dart';
 
 import 'History.dart';
 import 'package:flutter/material.dart';
@@ -206,23 +207,16 @@ class User {
     }
   }
 
+
+
   void updateLeaguesScore(StepBucket currentBucket) {
     this.updateUserAsLeagueMembersList();
     print(currentBucket.getSteps());
     for(int i = 0; i < this.usersLeagueMembers.length; i++) {
-      print("LEAGUE NAME : "+this.usersLeagueMembers[i].leagueID+"      "+this.usersLeagueMembers[i].hasUpdatedToday.toString());
-      if(currentBucket.getSteps() >= this.usersLeagueMembers[i].leagueGoal && !this.usersLeagueMembers[i].hasUpdatedToday) {
-        this.usersLeagueMembers[i].multiplierBucket.multiplier++;
-        this.usersLeagueMembers[i].multiplierBucket.offset = this.usersLeagueMembers[i].leagueGoal*(this.usersLeagueMembers[i].multiplier-1);
-        this.usersLeagueMembers[i].updateScore();
-        this.usersLeagueMembers[i].hasUpdatedToday = true;
-        Request.updateTodays(this.usersLeagueMembers[i], true);
-      }
-      else {
-        this.usersLeagueMembers[i].multiplierBucket.steps = currentBucket.getSteps() - (this.usersLeagueMembers[i].leagueGoal*(this.usersLeagueMembers[i].multiplierBucket.multiplier-1));
-        this.usersLeagueMembers[i].updateScore();
-      }
-      Request.updateScore(this.usersLeagueMembers[i]);
+      Request.updateScore(this.usersLeagueMembers[i]).then((MultiplierBucket res) {
+        this.usersLeagueMembers[i].multiplierBucket = res;
+        this.usersLeagueMembers[i].score = this.usersLeagueMembers[i].multiplierBucket.score;
+      });
     }
   }
 }
