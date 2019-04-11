@@ -16,7 +16,7 @@
     <application
         android:name="io.flutter.app.FlutterApplication"
         android:label="Trinity Active"
-        android:icon="@mipmap/launcher_icon"
+        android:icon="@mipmap/ic_launcher"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name=".MainActivity"
