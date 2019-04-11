@@ -90,6 +90,7 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
           isNewDayFromFile = true;
           bucketUpdatedFromFile = false;
           currentBucket.updateSteps(0);
+          //newDay();
         }
       }
     });
@@ -202,12 +203,18 @@ class SamplePageState extends State<SamplePage> with TickerProviderStateMixin{
       appBar: new AppBar(
         title:
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
 //            Image.asset(
 //              "images/trinity-logo.png",
 //              scale: 10,
 //            ),
             new Text("Trinity Active"),
+            new Image.asset(
+                "images/Trinity_Main_Logo.jpg",
+              color: Colors.blue,
+              colorBlendMode: BlendMode.multiply,
+            ),
             //new Text(testUser.leagues.length.toString()),
           ],
         ),
